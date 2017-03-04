@@ -141,7 +141,7 @@ func createClaimApplication(stub shim.ChaincodeStubInterface, args []string) ([]
 	}
 
 	var err error
-	var claimObj Claim
+	var claimObj Claim 
 	
 	var claimNo = args[0]
 	var claimApplicationInput = args[1]
