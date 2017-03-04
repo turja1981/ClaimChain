@@ -85,9 +85,9 @@ type Claim struct {
 	ClaimNo	    		string		`json:"claimNo"`
 	EstmLossAmount		string		`json:"estmLossAmount"` 
 	Status              string      `json:"status"`
-	LossDetails 		Loss 		`json:"lossDetails"`
-	InsuredDetails 		Insured 	`json:"insuredDetails"`
-	VehicleDetails 		Vehicle 	`json:"vehicleDetails"`
+	//LossDetails 		Loss 		`json:"lossDetails"`
+	//InsuredDetails 		Insured 	`json:"insuredDetails"`
+	//VehicleDetails 		Vehicle 	`json:"vehicleDetails"`
 //	PropertyDetails 	Property 	`json:"propertyDetails"`
 }
 
