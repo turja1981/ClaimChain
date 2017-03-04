@@ -133,6 +133,7 @@ func getClaimApplication(stub shim.ChaincodeStubInterface, args []string) ([]byt
 
 func createClaimApplication(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	logger.Debug("Entering CreateLoanApplication")
+	fmt.Printf("______________Inside createClaimApplication");
 
 	if len(args) < 2 {
 		logger.Error("Invalid number of args")
@@ -140,10 +141,13 @@ func createClaimApplication(stub shim.ChaincodeStubInterface, args []string) ([]
 	}
 
 	var err error
-	var claimObj Claim
+	var claimObj Claim 
 	
 	var claimNo = args[0]
 	var claimApplicationInput = args[1]
+	
+	logger.Debug("Entering CreateLoanApplication " +claimNo)
+	fmt.Printf("______________Inside createClaimApplication" + claimApplicationInput);
 
 	b := []byte(claimApplicationInput)
 	err = json.Unmarshal(b, &claimObj)
@@ -213,12 +217,17 @@ func updateClaimApplication(stub shim.ChaincodeStubInterface, args []string) ([]
 
 // Invoke is our entry point to invoke a chaincode function
 func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
+	fmt.Printf("______________Inside Invoke");
 	
 	if function == "createClaimApplication" {
+		fmt.Printf("______________Calling createClaimApplication");
+		return createClaimApplication(stub, args)
+	}
+	/*if function == "createClaimApplication" {
 		username, _ := GetCertAttribute(stub, "username")
 		role, _ := GetCertAttribute(stub, "role")
 		if role == "Claim_CSR" {
-			return createClaimApplication(stub, args)
+			
 		} else {
 			return nil, errors.New(username + " with role " + role + " does not have access to create a claim application")
 		}
@@ -231,6 +240,7 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
 				return nil, errors.New(username + " with role " + role + " does not have access to create a claim application")
 			}
 	}
+	*/
 	return nil, errors.New("Received unknown function invocation: " + function)
 }
 
