@@ -123,12 +123,27 @@ func getClaimApplication(stub shim.ChaincodeStubInterface, args []string) ([]byt
 	}
 
 	var claimNo = args[0]
+	var c Claim
 	bytes, err := stub.GetState(claimNo)
+	
+	err = json.Unmarshal(bytes, &c);
+
+
 	if err != nil {
 		logger.Error("Could not fetch Claim application with No "+claimNo+" from ledger", err)
 		return nil, err
 	}
 	return bytes, nil
+}
+// Query is our entry point for queries
+func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
+	fmt.Println("query is running " + function)
+
+	if function == "getClaimApplication" {
+		return getClaimApplication(stub, args)
+	}
+
+	return nil, nil
 }
 
 func createClaimApplication(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
@@ -139,20 +154,15 @@ func createClaimApplication(stub shim.ChaincodeStubInterface, args []string) ([]
 		logger.Error("Invalid number of args")
 		return nil, errors.New("Expected atleast two arguments for Claim application creation")
 	}
-
-	var err error
-	var claimObj Claim 
-	
-	var claimNo = args[0]
-	var claimApplicationInput = args[1]
-	
-	logger.Debug("Entering CreateLoanApplication " +claimNo)
-	fmt.Printf("______________Inside createClaimApplication" + claimApplicationInput);
-
-	b := []byte(claimApplicationInput)
-	err = json.Unmarshal(b, &claimObj)
-	
-	 _ , err = save_changes(stub,claimObj)
+		var claimNo = args[0]
+		var payload = args[1]
+		
+		payload = strings.Replace(payload, "^", "\"" , -1)
+		b := []byte(payload)
+		
+		var c Claim
+		var err = json.Unmarshal(b, &c)
+		_ , err = save_changes(stub , c)
 	
 	//err := stub.PutState(claimNo, bytes)
 	if err != nil {
@@ -170,7 +180,19 @@ func createClaimApplication(stub shim.ChaincodeStubInterface, args []string) ([]
 
 }
 
-
+func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
+	fmt.Println("______________Inside Invoke");
+	
+	if function == "createClaimApplication" {
+		return createClaimApplication(stub , args)
+	} else if function == "updateClaimApplication" {
+		return updateClaimApplication(stub , args)
+	}
+		
+	
+	
+	return nil, nil
+}
 func updateClaimApplication(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	logger.Debug("Entering UpdateLoanApplication")
 
@@ -216,50 +238,9 @@ func updateClaimApplication(stub shim.ChaincodeStubInterface, args []string) ([]
 
 
 // Invoke is our entry point to invoke a chaincode function
-func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
-	fmt.Println("______________Inside Invoke");
-	
-	if function == "createClaimApplication" {
-		fmt.Println("______________Calling createClaimApplication");
-		
-		var claimNo = args[0]
-		var status = args[1]
-		
-		status = strings.Replace(status, "^", "\"" , -1)
-		
-		b := []byte(status)
-		
-		var c Claim
-		
-		var err = json.Unmarshal(b, &c)
-		
-		//status = "{"+status+"}"
-		
-		fmt.Println("______________Calling createClaimApplication"+claimNo);
-		
-		fmt.Println("______________Calling createClaimApplication"+status);
-		
-		_ , err = save_changes(stub , c)
-		
-		if err != nil {
-        return nil, err
-    }
-		
-	}
-	
-	return nil, nil
-}
 
-// Query is our entry point for queries
-func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
-	fmt.Println("query is running " + function)
 
-	if function == "getClaimApplication" {
-		return getClaimApplication(stub, args)
-	}
 
-	return nil, nil
-}
 
 func GetCertAttribute(stub shim.ChaincodeStubInterface, attributeName string) (string, error) {
 	logger.Debug("Entering GetCertAttribute")
