@@ -225,11 +225,12 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
 		var claimNo = args[0]
 		var status = args[1]
 		
+		
 		fmt.Println("______________Calling createClaimApplication"+claimNo);
 		
 		fmt.Println("______________Calling createClaimApplication"+status);
 		
-		err = stub.PutState(claimNo, []byte(status))
+		var err = stub.PutState(claimNo, []byte(status))
 		
 		if err != nil {
         return nil, err
