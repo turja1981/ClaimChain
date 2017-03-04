@@ -92,7 +92,7 @@ type Claim struct {
 }
 
 
-var logger = shim.NewLogger("ClaimChain")
+
 
 
 // ============================================================================================================================
@@ -133,16 +133,28 @@ func getClaimApplication(stub shim.ChaincodeStubInterface, args []string) ([]byt
 
 func createClaimApplication(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	logger.Debug("Entering CreateLoanApplication")
+	fmt.Printf("______________Inside createClaimApplication");
 
 	if len(args) < 2 {
 		logger.Error("Invalid number of args")
 		return nil, errors.New("Expected atleast two arguments for Claim application creation")
 	}
 
+	var err error
+	var claimObj Claim
+	
 	var claimNo = args[0]
 	var claimApplicationInput = args[1]
+	
+	logger.Debug("Entering CreateLoanApplication " +claimNo)
+	fmt.Printf("______________Inside createClaimApplication" + claimApplicationInput);
 
-	err := stub.PutState(claimNo, []byte(claimApplicationInput))
+	b := []byte(claimApplicationInput)
+	err = json.Unmarshal(b, &claimObj)
+	
+	 _ , err = save_changes(stub,claimObj)
+	
+	//err := stub.PutState(claimNo, bytes)
 	if err != nil {
 		logger.Error("Could not save claim  to ledger", err)
 		return nil, err
@@ -205,12 +217,17 @@ func updateClaimApplication(stub shim.ChaincodeStubInterface, args []string) ([]
 
 // Invoke is our entry point to invoke a chaincode function
 func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
+	fmt.Printf("______________Inside Invoke");
 	
 	if function == "createClaimApplication" {
+		fmt.Printf("______________Calling createClaimApplication");
+		return createClaimApplication(stub, args)
+	}
+	/*if function == "createClaimApplication" {
 		username, _ := GetCertAttribute(stub, "username")
 		role, _ := GetCertAttribute(stub, "role")
 		if role == "Claim_CSR" {
-			return createClaimApplication(stub, args)
+			
 		} else {
 			return nil, errors.New(username + " with role " + role + " does not have access to create a claim application")
 		}
@@ -223,6 +240,7 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
 				return nil, errors.New(username + " with role " + role + " does not have access to create a claim application")
 			}
 	}
+	*/
 	return nil, errors.New("Received unknown function invocation: " + function)
 }
 
@@ -247,12 +265,12 @@ func GetCertAttribute(stub shim.ChaincodeStubInterface, attributeName string) (s
 	return attrString, nil
 }
 
-func (t *SimpleChaincode) add_fnol(stub shim.ChaincodeStubInterface, claimObj Claim) ([]byte, error) {
+func  add_fnol(stub shim.ChaincodeStubInterface, claimObj Claim) ([]byte, error) {
    
     var err error
     fmt.Println("running add_fnol()")
 
-    _ ,err = t.save_changes(stub, claimObj)
+    _ ,err = save_changes(stub, claimObj)
      
     if err != nil {
         return nil, err
@@ -267,24 +285,21 @@ type customEvent struct {
 }
 
 
-//==============================================================================================================================
-// save_changes - Writes to the ledger the Vehicle struct passed in a JSON format. Uses the shim file's
-//				  method 'PutState'.
-//==============================================================================================================================
-func (t *SimpleChaincode) save_changes(stub shim.ChaincodeStubInterface, c Claim) (bool, error) {
+
+func save_changes(stub shim.ChaincodeStubInterface, c Claim) (bool, error) {
 
 	bytes, err := json.Marshal(c)
 
 	if err != nil { fmt.Printf("SAVE_CHANGES: Error converting vehicle record: %s", err); return false, errors.New("Error converting claim record") }
 
-	err = stub.PutState(c.ClaimId, bytes)
+	err = stub.PutState(c.ClaimNo, bytes)
 
 	if err != nil { fmt.Printf("SAVE_CHANGES: Error storing vehicle record: %s", err); return false, errors.New("Error storing claim record") }
 
 	return true, nil
 }
 
-func (t *SimpleChaincode) retrieve_Claim(stub shim.ChaincodeStubInterface, claimNo string) (Claim, error) {
+func retrieve_Claim(stub shim.ChaincodeStubInterface, claimNo string) (Claim, error) {
 
 	var c Claim
 
