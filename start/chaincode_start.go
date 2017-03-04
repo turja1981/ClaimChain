@@ -109,6 +109,7 @@ func main() {
 func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 	
 	fmt.Println("Initialization Complete ")
+	logger.Info("Initialization Complete ")
 	
 	return nil, nil
 }
