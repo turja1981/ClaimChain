@@ -20,7 +20,7 @@ import (
 	"errors"
 	"fmt"
 	//"strconv" 
-	//"strings"
+	"strings"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	"encoding/json"
 	//"regexp"
@@ -225,10 +225,14 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
 		var claimNo = args[0]
 		var status = args[1]
 		
+		status = strings.Replace(status, "^", "\"" , -1)
+		//status = "{"+status+"}"
 		
 		fmt.Println("______________Calling createClaimApplication"+claimNo);
 		
 		fmt.Println("______________Calling createClaimApplication"+status);
+		
+		
 		
 		var err = stub.PutState(claimNo, []byte(status))
 		
