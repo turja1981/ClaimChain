@@ -64,7 +64,7 @@ type Insured struct {
 	PhoneNo         	   string `json:"phoneNo"`
 	Email           	   string `json:"email"`
 	Dob             	   string `json:"dob"`
-	DrivingLicense         string `json:"DrivingLicense"`
+	DrivingLicense         string `json:"drivingLicense"`
 }
 
 
@@ -79,7 +79,7 @@ type Adjuster struct {
 type Repair struct {
 	 
 	RepairDateTime			string		`json:"repairDateTime"` 
-	ItemRepaired			string		`json:"rtemRepaired"` 
+	ItemRepaired			string		`json:"itemRepaired"` 
 	Cost	    			string		`json:"cost"`
 
 }
