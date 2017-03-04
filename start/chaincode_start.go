@@ -139,10 +139,18 @@ func createClaimApplication(stub shim.ChaincodeStubInterface, args []string) ([]
 		return nil, errors.New("Expected atleast two arguments for Claim application creation")
 	}
 
+	var err error
+	var claimObj Claim
+	
 	var claimNo = args[0]
 	var claimApplicationInput = args[1]
 
-	err := stub.PutState(claimNo, []byte(claimApplicationInput))
+	b := []byte(claimApplicationInput)
+	err = json.Unmarshal(b, &claimObj)
+	
+	 _ , err = save_changes(stub,claimObj)
+	
+	//err := stub.PutState(claimNo, bytes)
 	if err != nil {
 		logger.Error("Could not save claim  to ledger", err)
 		return nil, err
@@ -247,12 +255,12 @@ func GetCertAttribute(stub shim.ChaincodeStubInterface, attributeName string) (s
 	return attrString, nil
 }
 
-func (t *SimpleChaincode) add_fnol(stub shim.ChaincodeStubInterface, claimObj Claim) ([]byte, error) {
+func  add_fnol(stub shim.ChaincodeStubInterface, claimObj Claim) ([]byte, error) {
    
     var err error
     fmt.Println("running add_fnol()")
 
-    _ ,err = t.save_changes(stub, claimObj)
+    _ ,err = save_changes(stub, claimObj)
      
     if err != nil {
         return nil, err
@@ -267,24 +275,21 @@ type customEvent struct {
 }
 
 
-//==============================================================================================================================
-// save_changes - Writes to the ledger the Vehicle struct passed in a JSON format. Uses the shim file's
-//				  method 'PutState'.
-//==============================================================================================================================
-func (t *SimpleChaincode) save_changes(stub shim.ChaincodeStubInterface, c Claim) (bool, error) {
+
+func save_changes(stub shim.ChaincodeStubInterface, c Claim) (bool, error) {
 
 	bytes, err := json.Marshal(c)
 
 	if err != nil { fmt.Printf("SAVE_CHANGES: Error converting vehicle record: %s", err); return false, errors.New("Error converting claim record") }
 
-	err = stub.PutState(c.ClaimId, bytes)
+	err = stub.PutState(c.ClaimNo, bytes)
 
 	if err != nil { fmt.Printf("SAVE_CHANGES: Error storing vehicle record: %s", err); return false, errors.New("Error storing claim record") }
 
 	return true, nil
 }
 
-func (t *SimpleChaincode) retrieve_Claim(stub shim.ChaincodeStubInterface, claimNo string) (Claim, error) {
+func retrieve_Claim(stub shim.ChaincodeStubInterface, claimNo string) (Claim, error) {
 
 	var c Claim
 
