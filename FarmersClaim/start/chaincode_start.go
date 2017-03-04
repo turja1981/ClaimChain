@@ -45,7 +45,6 @@ type Vehicle struct {
 	Model           string `json:"model"`
 	VIN             string `json:"vin"`
 	Year           	string `json:"year"`
-//	LicensePlate	string `json:"licensePlate"`
 }
 
 
@@ -68,15 +67,30 @@ type Insured struct {
 	DrivingLicense         string `json:"DrivingLicense"`
 }
 
-type Property struct {
-	PropertyAddress            	string `json:"PropertyAddress"`
-	PropertyCity         		string `json:"PropertyCity"`
-	PropertyState           	string `json:"PropertyState"`
-	PropertyZip             	string `json:"PropertyZip"`
-	IfRoofDamaged       		string `json:"ifRoofDamaged"`
-	IfLightingCausedFire       	string `json:"ifLightingCausedFire"`
+
+type Adjuster struct {
+	 
+	EvaluationDateTime	string		`json:"evaluationDateTime"` 
+	LossAmount			string		`json:"lossAmount"` 
+	Remarks	    		string		`json:"remarks"`
+
 }
 
+type Repair struct {
+	 
+	RepairDateTime			string		`json:"repairDateTime"` 
+	ItemRepaired			string		`json:"rtemRepaired"` 
+	Cost	    			string		`json:"cost"`
+
+}
+
+type Payment struct {
+	 
+	AccountNo				string		`json:"accountNo"` 
+	PaymentAmount			string		`json:"paymentAmount"` 
+	PaymentDateTime	    	string		`json:"paymentDateTime"`
+
+}
 
 type Claim struct {
 	 
@@ -85,12 +99,14 @@ type Claim struct {
 	ClaimNo	    		string		`json:"claimNo"`
 	EstmLossAmount		string		`json:"estmLossAmount"` 
 	Status              string      `json:"status"`
-	//LossDetails 		Loss 		`json:"lossDetails"`
-	//InsuredDetails 		Insured 	`json:"insuredDetails"`
-	//VehicleDetails 		Vehicle 	`json:"vehicleDetails"`
-//	PropertyDetails 	Property 	`json:"propertyDetails"`
-}
+	LossDetails 		Loss 		`json:"lossDetails"`
+	InsuredDetails 		Insured 	`json:"insuredDetails"`
+	VehicleDetails 		Vehicle 	`json:"vehicleDetails"`
+	AdjusterReport 		Adjuster 	`json:"adjusterReport"`
+	RepairedDetails 	Repair 		`json:"repairedDetails"`
+	PaymentDetails 		Payment 	`json:"paymentDetails"`
 
+}
 
 
 
@@ -186,53 +202,140 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
 	if function == "createClaimApplication" {
 		return createClaimApplication(stub , args)
 	} else if function == "updateClaimApplication" {
-		return updateClaimApplication(stub , args)
+		return updateClaimApplication(stub , function , args)
 	}
 		
 	
 	
 	return nil, nil
 }
-func updateClaimApplication(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+func updateClaimApplication(stub shim.ChaincodeStubInterface, functionName string , args []string) ([]byte, error) {
 	logger.Debug("Entering UpdateLoanApplication")
 
+	
+	
 	if len(args) < 2 {
 		logger.Error("Invalid number of args")
 		return nil, errors.New("Expected atleast two arguments for claim application update")
-	}
+		}
 
-	var claimNo = args[0]
-	var status = args[1]
-
-	laBytes, err := stub.GetState(claimNo)
-	if err != nil {
-		logger.Error("Could not fetch claim application from ledger", err)
-		return nil, err
-	}
-	var claimApplication Claim
-	err = json.Unmarshal(laBytes, &claimApplication)
-	claimApplication.Status = status
-
-	laBytes, err = json.Marshal(&claimApplication)
-	if err != nil {
+	
+	var asset					= args[0]
+	var claimNo 				= args[1]
+	
+	
+	if asset == "InvestigationReport"  {
+	
+		
+		var evaluationDateTime		= args[2]
+		var lossAmount 				= args[3]
+		var remarks					= args[4]
+		
+	
+		laBytes, err := stub.GetState(claimNo)
+		
+		if err != nil {
+			logger.Error("Could not fetch claim application from ledger", err)
+			return nil, err
+		}
+		var claimApplication Claim
+		err = json.Unmarshal(laBytes, &claimApplication)
+		
+		claimApplication.AdjusterReport.EvaluationDateTime 	= evaluationDateTime
+		claimApplication.AdjusterReport.LossAmount 			= lossAmount
+		claimApplication.AdjusterReport.Remarks 			= remarks
+		
+		laBytes, err = json.Marshal(&claimApplication)
+		
+		if err != nil {
 		logger.Error("Could not marshal claim application post update", err)
 		return nil, err
+		}
+
+		err = stub.PutState(claimNo, laBytes)
+		if err != nil {
+			logger.Error("Could not save claim application post update", err)
+			return nil, err
+		}
+		
+	} else if asset == "RepairInvoice"  {
+	
+		
+		var repairDateTime 		= args[2]
+		var itemRepaired 		= args[3]
+		var cost 				= args[4]
+		
+		laBytes, err := stub.GetState(claimNo)
+		
+		if err != nil {
+			logger.Error("Could not fetch claim application from ledger", err)
+			return nil, err
+		}
+		var claimApplication Claim
+		err = json.Unmarshal(laBytes, &claimApplication)
+		
+		claimApplication.RepairedDetails.RepairDateTime 	= repairDateTime
+		claimApplication.RepairedDetails.ItemRepaired 		= itemRepaired
+		claimApplication.RepairedDetails.Cost 				= cost
+		
+		laBytes, err = json.Marshal(&claimApplication)
+		
+		if err != nil {
+		logger.Error("Could not marshal claim application post update", err)
+		return nil, err
+		}
+
+		err = stub.PutState(claimNo, laBytes)
+		if err != nil {
+			logger.Error("Could not save claim application post update", err)
+			return nil, err
+		}
+		
+	} else if asset == "Payment"  {
+	
+		
+		var accountNo 		= args[2]
+		var paymentAmount 	= args[3]
+		var paymentDateTime = args[4]
+			
+	
+		laBytes, err := stub.GetState(claimNo)
+		if err != nil {
+			logger.Error("Could not fetch claim application from ledger", err)
+			return nil, err
+		}
+		var claimApplication Claim
+		err = json.Unmarshal(laBytes, &claimApplication)
+		
+		claimApplication.PaymentDetails.AccountNo 			= accountNo
+		claimApplication.PaymentDetails.PaymentAmount 		= paymentAmount
+		claimApplication.PaymentDetails.PaymentDateTime 	= paymentDateTime
+		
+		laBytes, err = json.Marshal(&claimApplication)
+		
+		if err != nil {
+		logger.Error("Could not marshal claim application post update", err)
+		return nil, err
+		}
+
+		err = stub.PutState(claimNo, laBytes)
+		if err != nil {
+			logger.Error("Could not save claim application post update", err)
+			return nil, err
+		}
 	}
 
-	err = stub.PutState(claimNo, laBytes)
-	if err != nil {
-		logger.Error("Could not save claim application post update", err)
-		return nil, err
-	}
+	
+	
+
 
 	var customEvent = "{eventType: 'claimApplicationUpdate', description:" + claimNo + "' Successfully updated status'}"
-	err = stub.SetEvent("evtSender", []byte(customEvent))
+	var err = stub.SetEvent("evtSender", []byte(customEvent))
 	if err != nil {
 		return nil, err
 	}
 	logger.Info("Successfully updated claim application")
 	return nil, nil
-
 }
 
 
