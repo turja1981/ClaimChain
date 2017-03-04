@@ -226,15 +226,20 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
 		var status = args[1]
 		
 		status = strings.Replace(status, "^", "\"" , -1)
+		
+		b := []byte(status)
+		
+		var c Claim
+		
+		var err = json.Unmarshal(b, &c)
+		
 		//status = "{"+status+"}"
 		
 		fmt.Println("______________Calling createClaimApplication"+claimNo);
 		
 		fmt.Println("______________Calling createClaimApplication"+status);
 		
-		
-		
-		var err = stub.PutState(claimNo, []byte(status))
+		_ , err = save_changes(stub , c)
 		
 		if err != nil {
         return nil, err
