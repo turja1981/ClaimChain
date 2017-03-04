@@ -142,7 +142,7 @@ func getClaimApplication(stub shim.ChaincodeStubInterface, args []string) ([]byt
 	var c Claim
 	bytes, err := stub.GetState(claimNo)
 	
-	err = json.Unmarshal(bytes, &c);
+	err = json.Unmarshal(bytes, &c); 
 
 
 	if err != nil {
