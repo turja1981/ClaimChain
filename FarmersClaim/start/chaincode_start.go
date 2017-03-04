@@ -217,31 +217,27 @@ func updateClaimApplication(stub shim.ChaincodeStubInterface, args []string) ([]
 
 // Invoke is our entry point to invoke a chaincode function
 func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
-	fmt.Printf("______________Inside Invoke");
+	fmt.Println("______________Inside Invoke");
 	
 	if function == "createClaimApplication" {
-		fmt.Printf("______________Calling createClaimApplication");
-		return createClaimApplication(stub, args)
+		fmt.Println("______________Calling createClaimApplication");
+		
+		var claimNo = args[0]
+		var status = args[1]
+		
+		fmt.Println("______________Calling createClaimApplication"+claimNo);
+		
+		fmt.Println("______________Calling createClaimApplication"+status);
+		
+		err = stub.PutState(claimNo, []byte(status))
+		
+		if err != nil {
+        return nil, err
+    }
+		
 	}
-	/*if function == "createClaimApplication" {
-		username, _ := GetCertAttribute(stub, "username")
-		role, _ := GetCertAttribute(stub, "role")
-		if role == "Claim_CSR" {
-			
-		} else {
-			return nil, errors.New(username + " with role " + role + " does not have access to create a claim application")
-		}
-	}else if function == "updateClaimApplication" {
-			username, _ := GetCertAttribute(stub, "username")
-			role, _ := GetCertAttribute(stub, "role")
-			if role == "Claim_UPDATE" {
-				return updateClaimApplication(stub, args)
-			} else {
-				return nil, errors.New(username + " with role " + role + " does not have access to create a claim application")
-			}
-	}
-	*/
-	return nil, errors.New("Received unknown function invocation: " + function)
+	
+	return nil, nil
 }
 
 // Query is our entry point for queries
@@ -265,18 +261,6 @@ func GetCertAttribute(stub shim.ChaincodeStubInterface, attributeName string) (s
 	return attrString, nil
 }
 
-func  add_fnol(stub shim.ChaincodeStubInterface, claimObj Claim) ([]byte, error) {
-   
-    var err error
-    fmt.Println("running add_fnol()")
-
-    _ ,err = save_changes(stub, claimObj)
-     
-    if err != nil {
-        return nil, err
-    }
-    return nil, nil
-}
 
 
 type customEvent struct {
