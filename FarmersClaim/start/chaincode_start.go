@@ -19,6 +19,9 @@ package main
 import (
 	"errors"
 	"fmt"
+	"net/http"
+	"io/ioutil"
+	"bytes"
 	//"strconv" 
 	"strings"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
@@ -129,7 +132,7 @@ func main() {
 func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 
 	fmt.Println("Initialization Complete ")
-	logger.Info("Initialization Complete ")
+	logger.Debug("Initialization Complete ")
 	
 	return nil, nil
 }
@@ -182,6 +185,13 @@ func createClaimApplication(stub shim.ChaincodeStubInterface, args []string) ([]
 		
 		var c Claim
 		var err = json.Unmarshal(b, &c)
+		
+		body := bytes.NewBuffer(b)
+		r, _ := http.Post("https://claimnode.mybluemix.net/verify/DMV", "application/json", body)
+		response, _ := ioutil.ReadAll(r.Body)
+		fmt.Println(string(response))
+	
+		c.Status   = 	string(response)
 		_ , err = save_changes(stub , c)
 	
 	//err := stub.PutState(claimNo, bytes)
@@ -234,6 +244,7 @@ func updateClaimApplication(stub shim.ChaincodeStubInterface, functionName strin
 		var evaluationDateTime		= args[2]
 		var lossAmount 				= args[3]
 		var remarks					= args[4]
+		var status					= args[5]
 		
 	
 		laBytes, err := stub.GetState(claimNo)
@@ -248,6 +259,7 @@ func updateClaimApplication(stub shim.ChaincodeStubInterface, functionName strin
 		claimApplication.AdjusterReport.EvaluationDateTime 	= evaluationDateTime
 		claimApplication.AdjusterReport.LossAmount 			= lossAmount
 		claimApplication.AdjusterReport.Remarks 			= remarks
+		claimApplication.Status								= status
 		
 		laBytes, err = json.Marshal(&claimApplication)
 		
@@ -262,12 +274,19 @@ func updateClaimApplication(stub shim.ChaincodeStubInterface, functionName strin
 			return nil, err
 		}
 		
+		var customEvent = "{eventType: 'claimApplicationUpdate', description:" + claimNo + "' : Investigation Report Submitted'}"
+		err = stub.SetEvent("Investigation_Report", []byte(customEvent))
+		if err != nil {
+			return nil, err
+		}
+		
 	} else if asset == "RepairInvoice"  {
 	
 		
 		var repairDateTime 		= args[2]
 		var itemRepaired 		= args[3]
 		var cost 				= args[4]
+		var status 				= args[5]
 		
 		laBytes, err := stub.GetState(claimNo)
 		
@@ -281,6 +300,7 @@ func updateClaimApplication(stub shim.ChaincodeStubInterface, functionName strin
 		claimApplication.RepairedDetails.RepairDateTime 	= repairDateTime
 		claimApplication.RepairedDetails.ItemRepaired 		= itemRepaired
 		claimApplication.RepairedDetails.Cost 				= cost
+		claimApplication.Status								= status
 		
 		laBytes, err = json.Marshal(&claimApplication)
 		
@@ -295,12 +315,19 @@ func updateClaimApplication(stub shim.ChaincodeStubInterface, functionName strin
 			return nil, err
 		}
 		
+		var customEvent = "{eventType: 'claimApplicationUpdate', description:" + claimNo + "' : Repair Invoice Submitted'}"
+		err = stub.SetEvent("Repair_Invoice", []byte(customEvent))
+		if err != nil {
+			return nil, err
+		}
+		
 	} else if asset == "Payment"  {
 	
 		
 		var accountNo 		= args[2]
 		var paymentAmount 	= args[3]
 		var paymentDateTime = args[4]
+		var status 			= args[5]
 			
 	
 		laBytes, err := stub.GetState(claimNo)
@@ -314,6 +341,7 @@ func updateClaimApplication(stub shim.ChaincodeStubInterface, functionName strin
 		claimApplication.PaymentDetails.AccountNo 			= accountNo
 		claimApplication.PaymentDetails.PaymentAmount 		= paymentAmount
 		claimApplication.PaymentDetails.PaymentDateTime 	= paymentDateTime
+		claimApplication.Status								= status
 		
 		laBytes, err = json.Marshal(&claimApplication)
 		
@@ -325,6 +353,12 @@ func updateClaimApplication(stub shim.ChaincodeStubInterface, functionName strin
 		err = stub.PutState(claimNo, laBytes)
 		if err != nil {
 			logger.Error("Could not save claim application post update", err)
+			return nil, err
+		}
+		
+		var customEvent = "{eventType: 'claimApplicationUpdate', description:" + claimNo + "' : Payment Processed'}"
+		err = stub.SetEvent("Bank_Payment", []byte(customEvent))
+		if err != nil {
 			return nil, err
 		}
 	}
