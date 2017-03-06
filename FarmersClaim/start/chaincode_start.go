@@ -104,6 +104,7 @@ type Claim struct {
 	ClaimNo	    		string		`json:"claimNo"`
 	EstmLossAmount		string		`json:"estmLossAmount"` 
 	Status              string      `json:"status"`
+	ExternalReport      string      `json:"externalReport"`
 	LossDetails 		Loss 		`json:"lossDetails"`
 	InsuredDetails 		Insured 	`json:"insuredDetails"`
 	VehicleDetails 		Vehicle 	`json:"vehicleDetails"`
@@ -186,13 +187,38 @@ func createClaimApplication(stub shim.ChaincodeStubInterface, args []string) ([]
 		var c Claim
 		var err = json.Unmarshal(b, &c)
 		
+		//DMV
+		
 		body := bytes.NewBuffer(b)
-		r, _ := http.Post("https://claimnode.mybluemix.net/verify/DMV", "application/json", body)
-		response, _ := ioutil.ReadAll(r.Body)
-		fmt.Println(string(response))
+		r_dmv, _ := http.Post("https://claimnode.mybluemix.net/verify/DMV", "application/json", body)
+		response_dmv, _ := ioutil.ReadAll(r_dmv.Body)
+		
+		var strDMVResponse  = string(response_dmv)
+		strDMVResponse = strings.Replace(strDMVResponse, "\\", "" , -1)
+		
+		// ISO
+		
+		r_iso, _ := http.Post("https://claimnode.mybluemix.net/verify/ISO", "application/json", body)
+		response_iso, _ := ioutil.ReadAll(r_iso.Body)
+		
+		var strISOResponse  = string(response_iso)
+		strISOResponse = strings.Replace(strISOResponse, "\\", "" , -1)
+		
+		// Choicepoint
+		
+		r_choicepoint, _ := http.Post("https://claimnode.mybluemix.net/verify/Choicepoint", "application/json", body)
+		response_choicepoint, _ := ioutil.ReadAll(r_choicepoint.Body)
+		
+		var strClueResponse  = string(response_choicepoint)
+		strClueResponse = strings.Replace(strClueResponse, "\\", "" , -1)
+		
 	
-		c.Status   = 	string(response)
+		c.ExternalReport   = 	strDMVResponse + " , " +strISOResponse+ "  , " + strClueResponse
 		_ , err = save_changes(stub , c)
+		
+		bytes, err := stub.GetState(claimNo)
+	
+		err = json.Unmarshal(bytes, &c); 
 	
 	//err := stub.PutState(claimNo, bytes)
 	if err != nil {
@@ -201,12 +227,12 @@ func createClaimApplication(stub shim.ChaincodeStubInterface, args []string) ([]
 	}
 
 	var customEvent = "{eventType: 'claimApplicationCreation', description:" + claimNo + "' Successfully created'}"
-	err = stub.SetEvent("evtSender", []byte(customEvent))
+	err = stub.SetEvent("Claim_Verification", []byte(customEvent))
 	if err != nil {
 		return nil, err
 	}
 	logger.Info("Successfully saved claim application")
-	return nil, nil
+	return bytes, nil
 
 }
 
@@ -363,15 +389,7 @@ func updateClaimApplication(stub shim.ChaincodeStubInterface, functionName strin
 		}
 	}
 
-	
-	
 
-
-	var customEvent = "{eventType: 'claimApplicationUpdate', description:" + claimNo + "' Successfully updated status'}"
-	var err = stub.SetEvent("evtSender", []byte(customEvent))
-	if err != nil {
-		return nil, err
-	}
 	logger.Info("Successfully updated claim application")
 	return nil, nil
 }
