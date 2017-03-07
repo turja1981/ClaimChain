@@ -32,12 +32,6 @@ import (
 
 var logger = shim.NewLogger("ClaimChaincode")
 
-const   CLAIM_SOURCE      	=  "claimsource"
-const   INSURANCE_COMPANY 	=  "insuranceCompany"
-const   ADJUSTER  			=  "adjuster"
-const   BANK 				=  "bank"
-
-
 
 // SimpleChaincode example simple Chaincode implementation
 type SimpleChaincode struct {
@@ -45,75 +39,84 @@ type SimpleChaincode struct {
 
 
 type Vehicle struct {
-	Make            string `json:"make"`
-	Model           string `json:"model"`
-	VIN             string `json:"vin"`
-	Year           	string `json:"year"`
+	Make            string `json:"make,omitempty"`
+	Model           string `json:"model,omitempty"`
+	VIN             string `json:"vin,omitempty"`
+	Year           	string `json:"year,omitempty"`
 }
 
 
 type Loss struct {
-	LossType            	string `json:"lossType"`
-	LossDateTime            string `json:"lossDate"`
-	LossDescription     	string `json:"lossDescription"`
-	LossAddress         	string `json:"lossAddress"`
-	LossCity            	string `json:"lossCity"`
-	LossState	    		string `json:"lossState"`
+	LossType            	string `json:"lossType,omitempty"`
+	LossDateTime            string `json:"lossDate,omitempty"`
+	LossDescription     	string `json:"lossDescription,omitempty"`
+	LossAddress         	string `json:"lossAddress,omitempty"`
+	LossCity            	string `json:"lossCity,omitempty"`
+	LossState	    		string `json:"lossState,omitempty"`
 
 }
 
 type Insured struct {
-	FirstName              string `json:"firstName"`
-	LastName           	   string `json:"lastName"`
-	PhoneNo         	   string `json:"phoneNo"`
-	Email           	   string `json:"email"`
-	Dob             	   string `json:"dob"`
-	Ssn             	   string `json:"ssn"`
-	DrivingLicense         string `json:"drivingLicense"`
+	FirstName              string `json:"firstName,omitempty"`
+	LastName           	   string `json:"lastName,omitempty"`
+	PhoneNo         	   string `json:"phoneNo,omitempty"`
+	Email           	   string `json:"email,omitempty"`
+	Dob             	   string `json:"dob,omitempty"`
+	Ssn             	   string `json:"ssn,omitempty"`
+	DrivingLicense         string `json:"drivingLicense,omitempty"`
 }
 
 
 type Adjuster struct {
 	 
-	EvaluationDateTime	string		`json:"evaluationDateTime"` 
-	LossAmount			string		`json:"lossAmount"` 
-	Remarks	    		string		`json:"remarks"`
+	EvaluationDateTime	string		`json:"evaluationDateTime,omitempty"` 
+	LossAmount			string		`json:"lossAmount,omitempty"` 
+	Remarks	    		string		`json:"remarks,omitempty"`
 
 }
 
 type Repair struct {
 	 
-	RepairDateTime			string		`json:"repairDateTime"` 
-	ItemRepaired			string		`json:"itemRepaired"` 
-	Cost	    			string		`json:"cost"`
+	RepairDateTime			string		`json:"repairDateTime,omitempty"` 
+	ItemRepaired			string		`json:"itemRepaired,omitempty"` 
+	Cost	    			string		`json:"cost,omitempty"`
 
 }
 
 type Payment struct {
 	 
-	AccountNo				string		`json:"accountNo"` 
-	PaymentAmount			string		`json:"paymentAmount"` 
-	PaymentDateTime	    	string		`json:"paymentDateTime"`
+	AccountNo				string		`json:"accountNo,omitempty"` 
+	PaymentAmount			string		`json:"paymentAmount,omitempty"` 
+	PaymentDateTime	    	string		`json:"paymentDateTime,omitempty"`
 
 }
 
 type Claim struct {
 	 
-	ClaimId	    		string		`json:"claimId"` 
-	PolicyNo			string		`json:"policyNo"` 
-	ClaimNo	    		string		`json:"claimNo"`
-	EstmLossAmount		string		`json:"estmLossAmount"` 
-	Status              string      `json:"status"`
-	ExternalReport      string      `json:"externalReport"`
-	LossDetails 		Loss 		`json:"lossDetails"`
-	InsuredDetails 		Insured 	`json:"insuredDetails"`
-	VehicleDetails 		Vehicle 	`json:"vehicleDetails"`
-	AdjusterReport 		Adjuster 	`json:"adjusterReport"`
-	RepairedDetails 	Repair 		`json:"repairedDetails"`
-	PaymentDetails 		Payment 	`json:"paymentDetails"`
+	ClaimId	    		string		`json:"claimId,omitempty"` 
+	PolicyNo			string		`json:"policyNo,omitempty"` 
+	ClaimNo	    		string		`json:"claimNo,omitempty"`
+	EstmLossAmount		string		`json:"estmLossAmount,omitempty"` 
+	Status              string      `json:"status,omitempty"`
+	ExternalReport      string      `json:"externalReport,omitempty"`
+	LossDetails 		Loss 		`json:"lossDetails,omitempty"`
+	InsuredDetails 		Insured 	`json:"insuredDetails,omitempty"`
+	VehicleDetails 		Vehicle 	`json:"vehicleDetails,omitempty"`
+	AdjusterReport 		Adjuster 	`json:"adjusterReport,omitempty"`
+	RepairedDetails 	Repair 		`json:"repairedDetails,omitempty"`
+	PaymentDetails 		Payment 	`json:"paymentDetails,omitempty"`
+	SensorData 		    Sensor 		`json:"sensorData,omitempty"`
 
 }
 
+
+
+type Sensor struct {
+    Latitude    *string `json:"latitude,omitempty"`
+    Longitude   *string `json:"longitude,omitempty"`
+    Image   	*string `json:"image,omitempty"`
+    Voice   	*string `json:"voice,omitempty"`
+}
 
 
 
@@ -138,7 +141,7 @@ func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface, function string
 	return nil, nil
 }
 
-func getClaimApplication(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+func (t *SimpleChaincode) readAsset(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	logger.Debug("Entering GetLoanApplication")
 
 	if len(args) < 1 {
@@ -163,14 +166,33 @@ func getClaimApplication(stub shim.ChaincodeStubInterface, args []string) ([]byt
 func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 	fmt.Println("query is running " + function)
 
-	if function == "getClaimApplication" {
-		return getClaimApplication(stub, args)
-	}
-
-	return nil, nil
+// Handle different functions
+    if function == "readAsset" {
+        // gets the state for an assetID as a JSON struct
+        return t.readAsset(stub, args)
+    } 
+    
+    return nil, errors.New("Received unknown invocation: " + function)
 }
 
-func createClaimApplication(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+
+
+func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
+	fmt.Println("______________Inside Invoke");
+	
+	 if function == "createAsset" {
+        // create assetID
+        return t.createAsset(stub, args)
+    } else if function == "updateAsset" {
+        // update assetID
+        return t.updateAsset(stub, args)
+    } 
+    
+	return nil, errors.New("Received unknown invocation: " + function)
+}
+
+
+func (t *SimpleChaincode) createAsset(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	logger.Debug("Entering CreateLoanApplication")
 	fmt.Printf("______________Inside createClaimApplication");
 
@@ -209,11 +231,11 @@ func createClaimApplication(stub shim.ChaincodeStubInterface, args []string) ([]
 		r_choicepoint, _ := http.Post("https://claimnode.mybluemix.net/verify/Choicepoint", "application/json", body)
 		response_choicepoint, _ := ioutil.ReadAll(r_choicepoint.Body)
 		
-		var strClueResponse  = string(response_choicepoint)
-		strClueResponse = strings.Replace(strClueResponse, "\\", "" , -1)
+		var strChoiceResponse  = string(response_choicepoint)
+		strChoiceResponse = strings.Replace(strChoiceResponse, "\\", "" , -1)
 		
 	
-		c.ExternalReport   = 	strDMVResponse + " , " +strISOResponse+ "  , " + strClueResponse
+		c.ExternalReport   = 	strDMVResponse + " , " +strISOResponse+ "  , " + strChoiceResponse
 		_ , err = save_changes(stub , c)
 		
 		bytes, err := stub.GetState(claimNo)
@@ -235,21 +257,9 @@ func createClaimApplication(stub shim.ChaincodeStubInterface, args []string) ([]
 	return bytes, nil
 
 }
+//******************** updateAsset ********************/
 
-func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
-	fmt.Println("______________Inside Invoke");
-	
-	if function == "createClaimApplication" {
-		return createClaimApplication(stub , args)
-	} else if function == "updateClaimApplication" {
-		return updateClaimApplication(stub , function , args)
-	}
-		
-	
-	
-	return nil, nil
-}
-func updateClaimApplication(stub shim.ChaincodeStubInterface, functionName string , args []string) ([]byte, error) {
+func (t *SimpleChaincode) updateAsset(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	logger.Debug("Entering UpdateLoanApplication")
 
 	
@@ -396,7 +406,6 @@ func updateClaimApplication(stub shim.ChaincodeStubInterface, functionName strin
 
 
 
-// Invoke is our entry point to invoke a chaincode function
 
 
 
