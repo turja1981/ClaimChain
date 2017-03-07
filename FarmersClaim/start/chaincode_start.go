@@ -48,7 +48,7 @@ type Vehicle struct {
 
 type Loss struct {
 	LossType            	string `json:"lossType,omitempty"`
-	LossDateTime            string `json:"lossDate,omitempty"`
+	LossDateTime            string `json:"lossDateTime,omitempty"`
 	LossDescription     	string `json:"lossDescription,omitempty"`
 	LossAddress         	string `json:"lossAddress,omitempty"`
 	LossCity            	string `json:"lossCity,omitempty"`
@@ -162,6 +162,28 @@ func (t *SimpleChaincode) readAsset(stub shim.ChaincodeStubInterface, args []str
 	}
 	return bytes, nil
 }
+
+func (t *SimpleChaincode) readAssetObjectModel(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+    var claimObj Claim = Claim{}
+
+    // Marshal and return
+    stateJSON, err := json.Marshal(claimObj)
+    if err != nil {
+        return nil, err
+    }
+    return stateJSON, nil
+}
+//*************readAssetSamples*******************/
+
+func (t *SimpleChaincode) readAssetSamples(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	return []byte(samples), nil
+}
+//*************readAssetSchemas*******************/
+
+func (t *SimpleChaincode) readAssetSchemas(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	return []byte(schemas), nil
+}
+
 // Query is our entry point for queries
 func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 	fmt.Println("query is running " + function)
@@ -170,7 +192,15 @@ func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function strin
     if function == "readAsset" {
         // gets the state for an assetID as a JSON struct
         return t.readAsset(stub, args)
-    } 
+    } else if function =="readAssetObjectModel" {
+        return t.readAssetObjectModel(stub, args)
+    }  else if function == "readAssetSamples" {
+		// returns selected sample objects 
+		return t.readAssetSamples(stub, args)
+	} else if function == "readAssetSchemas" {
+		// returns selected sample objects 
+		return t.readAssetSchemas(stub, args)
+	}
     
     return nil, errors.New("Received unknown invocation: " + function)
 }
