@@ -243,6 +243,10 @@ func (t *SimpleChaincode) createAsset(stub shim.ChaincodeStubInterface, args []s
 		var c Claim
 		var err = json.Unmarshal(b, &c)
 		
+		//bytes, err := json.Marshal(c)
+		
+		err = stub.PutState(c.ClaimNo, b)
+		
 		//DMV
 		/*
 		body := bytes.NewBuffer(b)
@@ -271,7 +275,7 @@ func (t *SimpleChaincode) createAsset(stub shim.ChaincodeStubInterface, args []s
 	
 		c.ExternalReport   = 	strDMVResponse + " , " +strISOResponse+ "  , " + strChoiceResponse
 		*/
-		_ , err = save_changes(stub , c)
+	//	_ , err = save_changes(stub , c)
 		
 	//	bytes, err := stub.GetState(claimNo)
 	
