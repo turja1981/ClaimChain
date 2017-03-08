@@ -235,7 +235,7 @@ func (t *SimpleChaincode) createAsset(stub shim.ChaincodeStubInterface, args []s
 		var claimNo = args[0]
 		var payload = args[1]
 		
-		payload = strings.Replace(payload, "^", "\"" , -1)
+		//payload = strings.Replace(payload, "^", "\"" , -1)
 		b := []byte(payload)
 		
 		var c Claim
