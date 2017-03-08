@@ -54,7 +54,7 @@ type Loss struct {
 	LossCity            	string `json:"lossCity,omitempty"`
 	LossState	    		string `json:"lossState,omitempty"` 
 
-}
+} 
 
 type Insured struct {
 	FirstName              string `json:"firstName,omitempty"`
