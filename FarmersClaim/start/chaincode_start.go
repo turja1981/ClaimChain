@@ -98,14 +98,14 @@ type Claim struct {
 	ClaimNo	    		string		`json:"claimNo,omitempty"`
 	EstmLossAmount		string		`json:"estmLossAmount,omitempty"` 
 	Status              string      `json:"status,omitempty"`
-	ExternalReport      string      `json:"externalReport,omitempty"`
-	LossDetails 		Loss 		`json:"lossDetails,omitempty"`
-	InsuredDetails 		Insured 	`json:"insuredDetails,omitempty"`
-	VehicleDetails 		Vehicle 	`json:"vehicleDetails,omitempty"`
-	AdjusterReport 		Adjuster 	`json:"adjusterReport,omitempty"`
-	RepairedDetails 	Repair 		`json:"repairedDetails,omitempty"`
-	PaymentDetails 		Payment 	`json:"paymentDetails,omitempty"`
-	SensorData 		    Sensor 		`json:"sensorData,omitempty"`
+//	ExternalReport      string      `json:"externalReport,omitempty"`
+//	LossDetails 		Loss 		`json:"lossDetails,omitempty"`
+//	InsuredDetails 		Insured 	`json:"insuredDetails,omitempty"`
+//	VehicleDetails 		Vehicle 	`json:"vehicleDetails,omitempty"`
+//	AdjusterReport 		Adjuster 	`json:"adjusterReport,omitempty"`
+//	RepairedDetails 	Repair 		`json:"repairedDetails,omitempty"`
+//	PaymentDetails 		Payment 	`json:"paymentDetails,omitempty"`
+//	SensorData 		    Sensor 		`json:"sensorData,omitempty"`
 
 }
 
@@ -114,8 +114,8 @@ type Claim struct {
 type Sensor struct {
     Latitude    *string `json:"latitude,omitempty"`
     Longitude   *string `json:"longitude,omitempty"`
-    Image   	*string `json:"image,omitempty"`
-    Voice   	*string `json:"voice,omitempty"`
+//    Image   	*string `json:"image,omitempty"`
+//    Voice   	*string `json:"voice,omitempty"`
 }
 
 
