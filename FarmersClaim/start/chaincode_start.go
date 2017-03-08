@@ -23,7 +23,7 @@ import (
 //	"io/ioutil"
 //	"bytes"
 	//"strconv" 
-	"strings"
+	//"strings"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	"encoding/json"
 	//"regexp"
