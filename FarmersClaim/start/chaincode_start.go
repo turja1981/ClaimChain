@@ -98,14 +98,14 @@ type Claim struct {
 	ClaimNo	    		string		`json:"claimNo,omitempty"`
 	EstmLossAmount		string		`json:"estmLossAmount,omitempty"` 
 	Status              string      `json:"status,omitempty"`
-//	ExternalReport      string      `json:"externalReport,omitempty"`
-//	LossDetails 		Loss 		`json:"lossDetails,omitempty"`
-//	InsuredDetails 		Insured 	`json:"insuredDetails,omitempty"`
-//	VehicleDetails 		Vehicle 	`json:"vehicleDetails,omitempty"`
-//	AdjusterReport 		Adjuster 	`json:"adjusterReport,omitempty"`
-//	RepairedDetails 	Repair 		`json:"repairedDetails,omitempty"`
-//	PaymentDetails 		Payment 	`json:"paymentDetails,omitempty"`
-//	SensorData 		    Sensor 		`json:"sensorData,omitempty"`
+	ExternalReport      string      `json:"externalReport,omitempty"`
+	LossDetails 		Loss 		`json:"lossDetails,omitempty"`
+	InsuredDetails 		Insured 	`json:"insuredDetails,omitempty"`
+	VehicleDetails 		Vehicle 	`json:"vehicleDetails,omitempty"`
+	AdjusterReport 		Adjuster 	`json:"adjusterReport,omitempty"`
+	RepairedDetails 	Repair 		`json:"repairedDetails,omitempty"`
+	PaymentDetails 		Payment 	`json:"paymentDetails,omitempty"`
+	SensorData 		    Sensor 		`json:"sensorData,omitempty"`
 
 }
 
@@ -151,15 +151,15 @@ func (t *SimpleChaincode) readAsset(stub shim.ChaincodeStubInterface, args []str
 		return nil, errors.New("Missing Claim No")
 	}
 
-	var claimNo = args[0]
+	var claimId = args[0]
 	var c Claim
-	bytes, err := stub.GetState(claimNo)
+	bytes, err := stub.GetState(claimId)
 	
 	err = json.Unmarshal(bytes, &c); 
 
 
 	if err != nil {
-		logger.Error("Could not fetch Claim application with No "+claimNo+" from ledger", err)
+		logger.Error("Could not fetch Claim application with No "+claimId+" from ledger", err)
 		return nil, err
 	}
 	return bytes, nil
@@ -228,24 +228,22 @@ func (t *SimpleChaincode) createAsset(stub shim.ChaincodeStubInterface, args []s
 	logger.Debug("Entering CreateLoanApplication")
 	fmt.Printf("______________Inside createClaimApplication");
 
-	if len(args) < 2 {
+	if len(args) < 1 {
 		logger.Error("Invalid number of args")
 		return nil, errors.New("Expected atleast two arguments for Claim application creation")
 	}
-		//var claimNo = args[0]
+		
 		var payload = args[0]
 		
 		//payload = strings.Replace(payload, "^", "\"" , -1)
 		b := []byte(payload)
 		
-	//	logger.Error("Invalid number of args"+claimNo)
+	
 		
 		var c Claim
 		var err = json.Unmarshal(b, &c)
 		
-		//bytes, err := json.Marshal(c)
 		
-		err = stub.PutState(c.ClaimNo, b)
 		
 		//DMV
 		/*
@@ -275,19 +273,15 @@ func (t *SimpleChaincode) createAsset(stub shim.ChaincodeStubInterface, args []s
 	
 		c.ExternalReport   = 	strDMVResponse + " , " +strISOResponse+ "  , " + strChoiceResponse
 		*/
-	//	_ , err = save_changes(stub , c)
+		_ , err = save_changes(stub , c)
 		
-	//	bytes, err := stub.GetState(claimNo)
-	
-//		err = json.Unmarshal(bytes, &c); 
-	
-	//err := stub.PutState(claimNo, bytes)
+
 	if err != nil {
 		logger.Error("Could not save claim  to ledger", err)
 		return nil, err
 	}
 
-	var customEvent = "{eventType: 'claimApplicationCreation', description:" + c.ClaimNo + "' Successfully created'}"
+	var customEvent = "{eventType: 'claimApplicationCreation', description:" + c.ClaimId + "' Successfully created'}"
 	err = stub.SetEvent("Claim_Verification", []byte(customEvent))
 	if err != nil {
 		return nil, err
@@ -310,10 +304,10 @@ func (t *SimpleChaincode) updateAsset(stub shim.ChaincodeStubInterface, args []s
 		}
 
 	
-	//var asset					= args[0]
-	//var claimNo 				= args[1]
+	var asset					= args[0]
+	var claimId 				= args[1]
 	
-	/*
+	
 	if asset == "InvestigationReport"  {
 	
 		
@@ -323,7 +317,7 @@ func (t *SimpleChaincode) updateAsset(stub shim.ChaincodeStubInterface, args []s
 		var status					= args[5]
 		
 	
-		laBytes, err := stub.GetState(claimNo)
+		laBytes, err := stub.GetState(claimId)
 		
 		if err != nil {
 			logger.Error("Could not fetch claim application from ledger", err)
@@ -345,13 +339,13 @@ func (t *SimpleChaincode) updateAsset(stub shim.ChaincodeStubInterface, args []s
 		return nil, err
 		}
 
-		err = stub.PutState(claimNo, laBytes)
+		err = stub.PutState(claimId, laBytes)
 		if err != nil {
 			logger.Error("Could not save claim application post update", err)
 			return nil, err
 		}
 		
-		var customEvent = "{eventType: 'claimApplicationUpdate', description:" + claimNo + "' : Investigation Report Submitted'}"
+		var customEvent = "{eventType: 'claimApplicationUpdate', description:" + claimId + "' : Investigation Report Submitted'}"
 		err = stub.SetEvent("Investigation_Report", []byte(customEvent))
 		if err != nil {
 			return nil, err
@@ -365,7 +359,7 @@ func (t *SimpleChaincode) updateAsset(stub shim.ChaincodeStubInterface, args []s
 		var cost 				= args[4]
 		var status 				= args[5]
 		
-		laBytes, err := stub.GetState(claimNo)
+		laBytes, err := stub.GetState(claimId)
 		
 		if err != nil {
 			logger.Error("Could not fetch claim application from ledger", err)
@@ -386,13 +380,13 @@ func (t *SimpleChaincode) updateAsset(stub shim.ChaincodeStubInterface, args []s
 		return nil, err
 		}
 
-		err = stub.PutState(claimNo, laBytes)
+		err = stub.PutState(claimId, laBytes)
 		if err != nil {
 			logger.Error("Could not save claim application post update", err)
 			return nil, err
 		}
 		
-		var customEvent = "{eventType: 'claimApplicationUpdate', description:" + claimNo + "' : Repair Invoice Submitted'}"
+		var customEvent = "{eventType: 'claimApplicationUpdate', description:" + claimId + "' : Repair Invoice Submitted'}"
 		err = stub.SetEvent("Repair_Invoice", []byte(customEvent))
 		if err != nil {
 			return nil, err
@@ -407,7 +401,7 @@ func (t *SimpleChaincode) updateAsset(stub shim.ChaincodeStubInterface, args []s
 		var status 			= args[5]
 			
 	
-		laBytes, err := stub.GetState(claimNo)
+		laBytes, err := stub.GetState(claimId)
 		if err != nil {
 			logger.Error("Could not fetch claim application from ledger", err)
 			return nil, err
@@ -427,28 +421,23 @@ func (t *SimpleChaincode) updateAsset(stub shim.ChaincodeStubInterface, args []s
 		return nil, err
 		}
 
-		err = stub.PutState(claimNo, laBytes)
+		err = stub.PutState(claimId, laBytes)
 		if err != nil {
 			logger.Error("Could not save claim application post update", err)
 			return nil, err
 		}
 		
-		var customEvent = "{eventType: 'claimApplicationUpdate', description:" + claimNo + "' : Payment Processed'}"
+		var customEvent = "{eventType: 'claimApplicationUpdate', description:" + claimId + "' : Payment Processed'}"
 		err = stub.SetEvent("Bank_Payment", []byte(customEvent))
 		if err != nil {
 			return nil, err
 		}
 	}
-*/
+
 
 	logger.Info("Successfully updated claim application")
 	return nil, nil
 }
-
-
-
-
-
 
 
 func GetCertAttribute(stub shim.ChaincodeStubInterface, attributeName string) (string, error) {
@@ -476,20 +465,20 @@ func save_changes(stub shim.ChaincodeStubInterface, c Claim) (bool, error) {
 
 	if err != nil { fmt.Printf("SAVE_CHANGES: Error converting vehicle record: %s", err); return false, errors.New("Error converting claim record") }
 
-	err = stub.PutState(c.ClaimNo, bytes)
+	err = stub.PutState(c.ClaimId, bytes)
 
 	if err != nil { fmt.Printf("SAVE_CHANGES: Error storing vehicle record: %s", err); return false, errors.New("Error storing claim record") }
 
 	return true, nil
 }
 
-func retrieve_Claim(stub shim.ChaincodeStubInterface, claimNo string) (Claim, error) {
+func retrieve_Claim(stub shim.ChaincodeStubInterface, claimId string) (Claim, error) {
 
 	var c Claim
 
-	bytes, err := stub.GetState(claimNo);
+	bytes, err := stub.GetState(claimId);
 
-	if err != nil {	fmt.Printf("RETRIEVE_claimId: Failed to invoke vehicle_code: %s", err); return c, errors.New("RETRIEVE_V5C: Error retrieving vehicle with v5cID = " + claimNo) }
+	if err != nil {	fmt.Printf("RETRIEVE_claimId: Failed to invoke vehicle_code: %s", err); return c, errors.New("RETRIEVE_V5C: Error retrieving vehicle with v5cID = " + claimId) }
 
 	err = json.Unmarshal(bytes, &c);
 
