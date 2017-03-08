@@ -238,8 +238,12 @@ func (t *SimpleChaincode) createAsset(stub shim.ChaincodeStubInterface, args []s
 		//payload = strings.Replace(payload, "^", "\"" , -1)
 		b := []byte(payload)
 		
-		var c Claim
-		var err = json.Unmarshal(b, &c)
+		logger.Error("Invalid number of args"+claimNo)
+		
+		
+		
+	//	var c Claim
+	//	var err = json.Unmarshal(b, &c)
 		
 		//DMV
 		/*
@@ -269,14 +273,14 @@ func (t *SimpleChaincode) createAsset(stub shim.ChaincodeStubInterface, args []s
 	
 		c.ExternalReport   = 	strDMVResponse + " , " +strISOResponse+ "  , " + strChoiceResponse
 		*/
-		_ , err = save_changes(stub , c)
+	//	_ , err = save_changes(stub , c)
 		
-		bytes, err := stub.GetState(claimNo)
+	//	bytes, err := stub.GetState(claimNo)
 	
-		err = json.Unmarshal(bytes, &c); 
+//		err = json.Unmarshal(bytes, &c); 
 	
 	//err := stub.PutState(claimNo, bytes)
-	if err != nil {
+/*	if err != nil {
 		logger.Error("Could not save claim  to ledger", err)
 		return nil, err
 	}
@@ -286,8 +290,9 @@ func (t *SimpleChaincode) createAsset(stub shim.ChaincodeStubInterface, args []s
 	if err != nil {
 		return nil, err
 	}
+	*/
 	logger.Info("Successfully saved claim application")
-	return bytes, nil
+	return b, nil
 
 }
 //******************** updateAsset ********************/
