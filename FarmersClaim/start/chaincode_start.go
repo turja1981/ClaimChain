@@ -19,9 +19,9 @@ package main
 import (
 	"errors"
 	"fmt"
-	"net/http"
-	"io/ioutil"
-	"bytes"
+//	"net/http"
+//	"io/ioutil"
+//	"bytes"
 	//"strconv" 
 	"strings"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
@@ -136,6 +136,8 @@ func main() {
 func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 
 	fmt.Println("Initialization Complete ")
+
+	
 	logger.Debug("Initialization Complete ")
 	
 	return nil, nil
@@ -240,7 +242,7 @@ func (t *SimpleChaincode) createAsset(stub shim.ChaincodeStubInterface, args []s
 		var err = json.Unmarshal(b, &c)
 		
 		//DMV
-		
+		/*
 		body := bytes.NewBuffer(b)
 		r_dmv, _ := http.Post("https://claimnode.mybluemix.net/verify/DMV", "application/json", body)
 		response_dmv, _ := ioutil.ReadAll(r_dmv.Body)
@@ -266,6 +268,7 @@ func (t *SimpleChaincode) createAsset(stub shim.ChaincodeStubInterface, args []s
 		
 	
 		c.ExternalReport   = 	strDMVResponse + " , " +strISOResponse+ "  , " + strChoiceResponse
+		*/
 		_ , err = save_changes(stub , c)
 		
 		bytes, err := stub.GetState(claimNo)
@@ -300,10 +303,10 @@ func (t *SimpleChaincode) updateAsset(stub shim.ChaincodeStubInterface, args []s
 		}
 
 	
-	var asset					= args[0]
-	var claimNo 				= args[1]
+	//var asset					= args[0]
+	//var claimNo 				= args[1]
 	
-	
+	/*
 	if asset == "InvestigationReport"  {
 	
 		
@@ -321,6 +324,7 @@ func (t *SimpleChaincode) updateAsset(stub shim.ChaincodeStubInterface, args []s
 		}
 		var claimApplication Claim
 		err = json.Unmarshal(laBytes, &claimApplication)
+		
 		
 		claimApplication.AdjusterReport.EvaluationDateTime 	= evaluationDateTime
 		claimApplication.AdjusterReport.LossAmount 			= lossAmount
@@ -428,7 +432,7 @@ func (t *SimpleChaincode) updateAsset(stub shim.ChaincodeStubInterface, args []s
 			return nil, err
 		}
 	}
-
+*/
 
 	logger.Info("Successfully updated claim application")
 	return nil, nil
