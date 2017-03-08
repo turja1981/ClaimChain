@@ -52,7 +52,7 @@ type Loss struct {
 	LossDescription     	string `json:"lossDescription,omitempty"`
 	LossAddress         	string `json:"lossAddress,omitempty"`
 	LossCity            	string `json:"lossCity,omitempty"`
-	LossState	    		string `json:"lossState,omitempty"`
+	LossState	    		string `json:"lossState,omitempty"` 
 
 }
 
