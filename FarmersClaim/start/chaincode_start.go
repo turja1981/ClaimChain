@@ -232,15 +232,13 @@ func (t *SimpleChaincode) createAsset(stub shim.ChaincodeStubInterface, args []s
 		logger.Error("Invalid number of args")
 		return nil, errors.New("Expected atleast two arguments for Claim application creation")
 	}
-		var claimNo = args[0]
-		var payload = args[1]
+		//var claimNo = args[0]
+		var payload = args[0]
 		
 		//payload = strings.Replace(payload, "^", "\"" , -1)
 		b := []byte(payload)
 		
-		logger.Error("Invalid number of args"+claimNo)
-		
-		
+	//	logger.Error("Invalid number of args"+claimNo)
 		
 		var c Claim
 		var err = json.Unmarshal(b, &c)
@@ -273,7 +271,7 @@ func (t *SimpleChaincode) createAsset(stub shim.ChaincodeStubInterface, args []s
 	
 		c.ExternalReport   = 	strDMVResponse + " , " +strISOResponse+ "  , " + strChoiceResponse
 		*/
-	//	_ , err = save_changes(stub , c)
+		_ , err = save_changes(stub , c)
 		
 	//	bytes, err := stub.GetState(claimNo)
 	
@@ -285,7 +283,7 @@ func (t *SimpleChaincode) createAsset(stub shim.ChaincodeStubInterface, args []s
 		return nil, err
 	}
 
-	var customEvent = "{eventType: 'claimApplicationCreation', description:" + claimNo + "' Successfully created'}"
+	var customEvent = "{eventType: 'claimApplicationCreation', description:" + c.ClaimNo + "' Successfully created'}"
 	err = stub.SetEvent("Claim_Verification", []byte(customEvent))
 	if err != nil {
 		return nil, err
