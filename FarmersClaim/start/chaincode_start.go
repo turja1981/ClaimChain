@@ -242,8 +242,8 @@ func (t *SimpleChaincode) createAsset(stub shim.ChaincodeStubInterface, args []s
 		
 		
 		
-	//	var c Claim
-	//	var err = json.Unmarshal(b, &c)
+		var c Claim
+		var err = json.Unmarshal(b, &c)
 		
 		//DMV
 		/*
@@ -280,7 +280,7 @@ func (t *SimpleChaincode) createAsset(stub shim.ChaincodeStubInterface, args []s
 //		err = json.Unmarshal(bytes, &c); 
 	
 	//err := stub.PutState(claimNo, bytes)
-/*	if err != nil {
+	if err != nil {
 		logger.Error("Could not save claim  to ledger", err)
 		return nil, err
 	}
@@ -290,7 +290,7 @@ func (t *SimpleChaincode) createAsset(stub shim.ChaincodeStubInterface, args []s
 	if err != nil {
 		return nil, err
 	}
-	*/
+	
 	logger.Info("Successfully saved claim application")
 	return b, nil
 
