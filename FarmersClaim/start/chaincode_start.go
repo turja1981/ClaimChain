@@ -156,11 +156,11 @@ func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface, function string
 
 	fmt.Println("Initialization Complete ")
 
-	t.createFraudTable(stub);
+	err := t.createFraudTable(stub);
 	
 	logger.Debug("Initialization Complete ")
 	
-	return nil, nil
+	return nil, err
 }
 
 func (t *SimpleChaincode) readAsset(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
@@ -318,7 +318,7 @@ func (t *SimpleChaincode) createAsset(stub shim.ChaincodeStubInterface, args []s
 
 }
 
-func (t *SimpleChaincode) createFraudTable(stub shim.ChaincodeStubInterface) ([]byte, error) {
+func (t *SimpleChaincode) createFraudTable(stub shim.ChaincodeStubInterface) (error) {
 	
 	var column[] *shim.ColumnDefinition
 	
@@ -332,8 +332,8 @@ func (t *SimpleChaincode) createFraudTable(stub shim.ChaincodeStubInterface) ([]
 	column[2].Name= "DOL"
 	column[2].Type= shim.ColumnDefinition_STRING
  
-	stub.CreateTable("CHECK_FRAUD_TABLE" , column);
-	return nil , nil
+	err:= stub.CreateTable("CHECK_FRAUD_TABLE" , column);
+	return err
 }
 
 func (t *SimpleChaincode) insertFraudTable(stub shim.ChaincodeStubInterface , args []string) ([]byte, error) {
