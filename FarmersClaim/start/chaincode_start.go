@@ -18,6 +18,7 @@ package main
 
 import (
 	"errors"
+//	"github.com/hyperledger/fabric/core/chaincode/shim/table.pb"
 	"fmt"
 //	"net/http"
 //	"io/ioutil"
@@ -155,6 +156,7 @@ func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface, function string
 
 	fmt.Println("Initialization Complete ")
 
+	t.createFraudTable(stub);
 	
 	logger.Debug("Initialization Complete ")
 	
@@ -236,7 +238,13 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
     } else if function == "updateAsset" {
         // update assetID
         return t.updateAsset(stub, args)
-    } 
+    } else if function == "insertFraudTable" {
+        // update assetID
+        return t.insertFraudTable(stub ,args )
+    } else if function == "checkFraudTable" {
+        flag , _ :=  t.checkFraudTable(stub , args)
+        return []byte(flag), nil
+    }    
     
 	return nil, errors.New("Received unknown invocation: " + function)
 }
@@ -308,6 +316,68 @@ func (t *SimpleChaincode) createAsset(stub shim.ChaincodeStubInterface, args []s
 	logger.Info("Successfully saved claim application")
 	return b, nil
 
+}
+
+func (t *SimpleChaincode) createFraudTable(stub shim.ChaincodeStubInterface) ([]byte, error) {
+	
+	var column[] *shim.ColumnDefinition
+	
+	column[0].Name= "SSN"
+	column[0].Type= shim.ColumnDefinition_STRING
+	
+	column[1].Name= "VIN"
+	column[1].Type= shim.ColumnDefinition_STRING
+
+
+	column[2].Name= "DOL"
+	column[2].Type= shim.ColumnDefinition_STRING
+ 
+	stub.CreateTable("CHECK_FRAUD_TABLE" , column);
+	return nil , nil
+}
+
+func (t *SimpleChaincode) insertFraudTable(stub shim.ChaincodeStubInterface , args []string) ([]byte, error) {
+
+	var row shim.Row
+	//var column *shim.Column
+	var temp , temp1 , temp2 *shim.Column_String_
+	temp.String_= args[0] //"12345"
+	temp1.String_=args[1] //"999999"
+	temp2.String_=args[2] // "03/01/1981"
+	//column = &shim.Column{Value :"12345"}
+	row.Columns[0].Value=temp
+	row.Columns[1].Value=temp1
+	row.Columns[2].Value=temp2
+//	row.VIN ="XYZ" 
+//	row.DOL ="03/01/2017" 
+
+	stub.InsertRow("CHECK_FRAUD_TABLE" ,row)
+	
+	return nil , nil
+}
+
+func (t *SimpleChaincode) checkFraudTable(stub shim.ChaincodeStubInterface , args []string ) (string , error) {
+
+	var key []shim.Column 
+	var row shim.Row
+//	var err error
+	var temp , temp1 , temp2 *shim.Column_String_
+	
+	temp.String_= args[0] //"12345"
+	temp1.String_= args[1] //"999999"
+	temp2.String_= args[2] //"03/01/1981"
+	
+	key[0].Value = temp
+	key[1].Value = temp1
+	key[2].Value = temp2
+	
+	row , _= stub.GetRow("CHECK_FRAUD_TABLE" ,key )
+	
+	if (len(row.Columns) > 0) {
+		return "TRUE" , nil
+	}
+	
+	return "FALSE" , nil
 }
 //******************** updateAsset ********************/
 
