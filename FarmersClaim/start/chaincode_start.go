@@ -296,8 +296,14 @@ func (t *SimpleChaincode) createAsset(stub shim.ChaincodeStubInterface, args []s
 		
 		flag , _  :=  t.checkFraudRecord(stub,c)
 		if (!flag) {
-			
 			_ , err = save_changes(stub , c)
+			
+			msg := "Claim Save Successfully" 
+			b = []byte(msg)
+			
+		} else {
+			msg := "Poteltial Duplicate Claim" 
+			b = []byte(msg)
 		}
 		
 		
@@ -313,7 +319,7 @@ func (t *SimpleChaincode) createAsset(stub shim.ChaincodeStubInterface, args []s
 		return nil, err
 	}
 	
-	logger.Info("Successfully saved claim application")
+	logger.Info("Successfully saved claim application :"+c.ClaimNo)
 	return b, nil
 
 }
@@ -515,11 +521,13 @@ func save_changes(stub shim.ChaincodeStubInterface, c Claim) (bool, error) {
 	err = stub.PutState(c.ClaimNo, bytes)
 	
 	if err != nil { fmt.Printf("SAVE_CHANGES: Error storing vehicle record: %s", err); return false, errors.New("Error storing claim record") }
+	
+	logger.Debug("Save Complete for the key :- "+c.ClaimNo)
 	return true, nil
 }
 
 func (t *SimpleChaincode) checkFraudRecord(stub shim.ChaincodeStubInterface , c Claim ) (bool , error) {
-	logger.Debug("Entering GetLoanApplication")
+	logger.Debug("Entering checkFraudRecord for the key :- "+c.InsuredDetails.SSN + c.VehicleDetails.VIN + c.LossDetails.LossDateTime)
 
 	var dupClaim Claim  
 	bytes, err := stub.GetState(c.InsuredDetails.SSN + c.VehicleDetails.VIN + c.LossDetails.LossDateTime)
@@ -528,11 +536,12 @@ func (t *SimpleChaincode) checkFraudRecord(stub shim.ChaincodeStubInterface , c 
 
 	
 	if err != nil {
-		logger.Error("Could not fetch Claim application with No "+c.InsuredDetails.SSN + c.VehicleDetails.VIN + c.LossDetails.LossDateTime+" from ledger", err)
+		logger.Error("Could not fetch Claim application with Key "+c.InsuredDetails.SSN + c.VehicleDetails.VIN + c.LossDetails.LossDateTime+" from ledger", err)
 		return false, err
 	}
 	
 	if (dupClaim.InsuredDetails.SSN == c.InsuredDetails.SSN && c.VehicleDetails.VIN == dupClaim.VehicleDetails.VIN &&  c.LossDetails.LossDateTime == dupClaim.LossDetails.LossDateTime ) {
+		logger.Debug("Duplicate Claim Found with Key :-"+dupClaim.InsuredDetails.SSN + dupClaim.VehicleDetails.VIN + dupClaim.LossDetails.LossDateTime)
 		return true , nil 
 	}
 		
