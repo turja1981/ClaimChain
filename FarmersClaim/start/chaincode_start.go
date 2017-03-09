@@ -64,7 +64,7 @@ type Insured struct {
 	PhoneNo         	   string `json:"phoneNo,omitempty"`
 	Email           	   string `json:"email,omitempty"`
 	Dob             	   string `json:"dob,omitempty"`
-	Ssn             	   string `json:"ssn,omitempty"`
+	SSN             	   string `json:"ssn,omitempty"`
 	DrivingLicense         string `json:"drivingLicense,omitempty"`
 }
 
@@ -156,11 +156,11 @@ func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface, function string
 
 	fmt.Println("Initialization Complete ")
 
-	err := t.createFraudTable(stub);
+	//err := t.createFraudTable(stub);
 	
 	logger.Debug("Initialization Complete ")
 	
-	return nil, err
+	return nil , nil
 }
 
 func (t *SimpleChaincode) readAsset(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
@@ -238,13 +238,7 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
     } else if function == "updateAsset" {
         // update assetID
         return t.updateAsset(stub, args)
-    } else if function == "insertFraudTable" {
-        // update assetID
-        return t.insertFraudTable(stub ,args )
-    } else if function == "checkFraudTable" {
-        flag , _ :=  t.checkFraudTable(stub , args)
-        return []byte(flag), nil
-    }    
+    } 
     
 	return nil, errors.New("Received unknown invocation: " + function)
 }
@@ -299,7 +293,13 @@ func (t *SimpleChaincode) createAsset(stub shim.ChaincodeStubInterface, args []s
 	
 		c.ExternalReport   = 	strDMVResponse + " , " +strISOResponse+ "  , " + strChoiceResponse
 		*/
-		_ , err = save_changes(stub , c)
+		
+		flag , _  :=  t.checkFraudRecord(stub,c)
+		if (!flag) {
+			
+			_ , err = save_changes(stub , c)
+		}
+		
 		
 
 	if err != nil {
@@ -318,67 +318,7 @@ func (t *SimpleChaincode) createAsset(stub shim.ChaincodeStubInterface, args []s
 
 }
 
-func (t *SimpleChaincode) createFraudTable(stub shim.ChaincodeStubInterface) (error) {
-	
-	var column[] *shim.ColumnDefinition
-	
-	column[0].Name= "SSN"
-	column[0].Type= shim.ColumnDefinition_STRING
-	
-	column[1].Name= "VIN"
-	column[1].Type= shim.ColumnDefinition_STRING
 
-
-	column[2].Name= "DOL"
-	column[2].Type= shim.ColumnDefinition_STRING
- 
-	err:= stub.CreateTable("CHECK_FRAUD_TABLE" , column);
-	return err
-}
-
-func (t *SimpleChaincode) insertFraudTable(stub shim.ChaincodeStubInterface , args []string) ([]byte, error) {
-
-	var row shim.Row
-	//var column *shim.Column
-	var temp , temp1 , temp2 *shim.Column_String_
-	temp.String_= args[0] //"12345"
-	temp1.String_=args[1] //"999999"
-	temp2.String_=args[2] // "03/01/1981"
-	//column = &shim.Column{Value :"12345"}
-	row.Columns[0].Value=temp
-	row.Columns[1].Value=temp1
-	row.Columns[2].Value=temp2
-//	row.VIN ="XYZ" 
-//	row.DOL ="03/01/2017" 
-
-	stub.InsertRow("CHECK_FRAUD_TABLE" ,row)
-	
-	return nil , nil
-}
-
-func (t *SimpleChaincode) checkFraudTable(stub shim.ChaincodeStubInterface , args []string ) (string , error) {
-
-	var key []shim.Column 
-	var row shim.Row
-//	var err error
-	var temp , temp1 , temp2 *shim.Column_String_
-	
-	temp.String_= args[0] //"12345"
-	temp1.String_= args[1] //"999999"
-	temp2.String_= args[2] //"03/01/1981"
-	
-	key[0].Value = temp
-	key[1].Value = temp1
-	key[2].Value = temp2
-	
-	row , _= stub.GetRow("CHECK_FRAUD_TABLE" ,key )
-	
-	if (len(row.Columns) > 0) {
-		return "TRUE" , nil
-	}
-	
-	return "FALSE" , nil
-}
 //******************** updateAsset ********************/
 
 func (t *SimpleChaincode) updateAsset(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
@@ -567,12 +507,40 @@ func save_changes(stub shim.ChaincodeStubInterface, c Claim) (bool, error) {
 
 	if err != nil { fmt.Printf("SAVE_CHANGES: Error converting vehicle record: %s", err); return false, errors.New("Error converting claim record") }
 
-	err = stub.PutState(c.ClaimNo, bytes)
+	key := c.InsuredDetails.SSN + c.VehicleDetails.VIN + c.LossDetails.LossDateTime
+	err = stub.PutState(key, bytes)
 
 	if err != nil { fmt.Printf("SAVE_CHANGES: Error storing vehicle record: %s", err); return false, errors.New("Error storing claim record") }
 
+	err = stub.PutState(c.ClaimNo, bytes)
+	
+	if err != nil { fmt.Printf("SAVE_CHANGES: Error storing vehicle record: %s", err); return false, errors.New("Error storing claim record") }
 	return true, nil
 }
+
+func (t *SimpleChaincode) checkFraudRecord(stub shim.ChaincodeStubInterface , c Claim ) (bool , error) {
+	logger.Debug("Entering GetLoanApplication")
+
+	var dupClaim Claim  
+	bytes, err := stub.GetState(c.InsuredDetails.SSN + c.VehicleDetails.VIN + c.LossDetails.LossDateTime)
+	
+    err = json.Unmarshal(bytes, &dupClaim); 
+
+	
+	if err != nil {
+		logger.Error("Could not fetch Claim application with No "+c.InsuredDetails.SSN + c.VehicleDetails.VIN + c.LossDetails.LossDateTime+" from ledger", err)
+		return false, err
+	}
+	
+	if (dupClaim.InsuredDetails.SSN == c.InsuredDetails.SSN && c.VehicleDetails.VIN == dupClaim.VehicleDetails.VIN &&  c.LossDetails.LossDateTime == dupClaim.LossDetails.LossDateTime ) {
+		return true , nil 
+	}
+		
+	return false, nil
+	
+}
+
+
 
 func retrieve_Claim(stub shim.ChaincodeStubInterface, claimNo string) (Claim, error) {
 
@@ -588,3 +556,64 @@ func retrieve_Claim(stub shim.ChaincodeStubInterface, claimNo string) (Claim, er
 
 	return c, nil
 }
+
+func (t *SimpleChaincode) createFraudTable(stub shim.ChaincodeStubInterface) (error) {
+	
+	var column[] *shim.ColumnDefinition
+	
+	column[0].Name= "SSN"
+	column[0].Type= shim.ColumnDefinition_STRING
+	
+	column[1].Name= "VIN"
+	column[1].Type= shim.ColumnDefinition_STRING
+
+
+	column[2].Name= "DOL"
+	column[2].Type= shim.ColumnDefinition_STRING
+ 
+	err:= stub.CreateTable("CHECK_FRAUD_TABLE" , column);
+	return err
+}
+
+func (t *SimpleChaincode) insertFraudTable(stub shim.ChaincodeStubInterface , args []string) ([]byte, error) {
+
+	var row shim.Row
+	//var column *shim.Column
+	var temp , temp1 , temp2 *shim.Column_String_
+	temp.String_= args[0] //"12345"
+	temp1.String_=args[1] //"999999"
+	temp2.String_=args[2] // "03/01/1981"
+	//column = &shim.Column{Value :"12345"}
+	row.Columns[0].Value=temp
+	row.Columns[1].Value=temp1
+	row.Columns[2].Value=temp2
+//	row.VIN ="XYZ" 
+//	row.DOL ="03/01/2017" 
+
+	stub.InsertRow("CHECK_FRAUD_TABLE" ,row)
+	
+	return nil , nil
+}
+
+
+/*	var key []shim.Column 
+	var row shim.Row
+//	var err error
+	var temp , temp1 , temp2 *shim.Column_String_
+	
+	temp.String_= args[0] //"12345"
+	temp1.String_= args[1] //"999999"
+	temp2.String_= args[2] //"03/01/1981"
+	
+	key[0].Value = temp
+	key[1].Value = temp1
+	key[2].Value = temp2
+	
+	row , _= stub.GetRow("CHECK_FRAUD_TABLE" ,key )
+	
+	if (len(row.Columns) > 0) {
+		return "TRUE" , nil
+	}
+	
+	return "FALSE" , nil
+	*/
