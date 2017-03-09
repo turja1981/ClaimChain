@@ -263,7 +263,7 @@ func (t *SimpleChaincode) createAsset(stub shim.ChaincodeStubInterface, args []s
 		var c Claim
 		var err = json.Unmarshal(b, &c)
 		
-		
+		var bytes []byte
 		
 		//DMV
 		/*
@@ -298,12 +298,13 @@ func (t *SimpleChaincode) createAsset(stub shim.ChaincodeStubInterface, args []s
 		if (!flag) {
 			_ , err = save_changes(stub , c)
 			
-			msg := "Claim Save Successfully" 
-			b = []byte(msg)
+			bytes, err = stub.GetState(c.ClaimNo)
+			
+			err = json.Unmarshal(bytes, &c); 
 			
 		} else {
-			msg := "Poteltial Duplicate Claim" 
-			b = []byte(msg)
+			returnMsg := "{"+"\"ReturnMessage\""+":"+"\"Poteltial Duplicate Claim\""+"}" 
+			bytes = (([]byte)(returnMsg))
 		}
 		
 		
@@ -319,8 +320,8 @@ func (t *SimpleChaincode) createAsset(stub shim.ChaincodeStubInterface, args []s
 		return nil, err
 	}
 	
-	logger.Info("Successfully saved claim application :"+c.ClaimNo)
-	return b, nil
+	logger.Info("Returning from create claim application :"+c.ClaimNo)
+	return bytes, nil
 
 }
 
