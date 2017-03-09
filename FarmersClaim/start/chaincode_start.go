@@ -138,7 +138,7 @@ type Sensor struct {
 }
 
 
-
+var int CLAIM_NO = 7000000
 // ============================================================================================================================
 // Main
 // ============================================================================================================================
@@ -254,11 +254,7 @@ func (t *SimpleChaincode) createAsset(stub shim.ChaincodeStubInterface, args []s
 	}
 		
 		var payload = args[0]
-		
-		//payload = strings.Replace(payload, "^", "\"" , -1)
 		b := []byte(payload)
-		
-	
 		
 		var c Claim
 		var err = json.Unmarshal(b, &c)
@@ -296,6 +292,8 @@ func (t *SimpleChaincode) createAsset(stub shim.ChaincodeStubInterface, args []s
 		
 		flag , _  :=  t.checkFraudRecord(stub,c)
 		if (!flag) {
+			CLAIM_NO =  CLAIM_NO + 1
+			c.ClaimNo = CLAIM_NO
 			_ , err = save_changes(stub , c)
 			
 			bytes, err = stub.GetState(c.ClaimNo)
