@@ -534,14 +534,17 @@ func save_changes(stub shim.ChaincodeStubInterface, c Claim) (bool, error) {
 func (t *SimpleChaincode) checkFraudRecord(stub shim.ChaincodeStubInterface , c Claim ) (bool , error) {
 	logger.Debug("Entering checkFraudRecord for the key :- "+c.InsuredDetails.SSN + c.VehicleDetails.VIN + c.LossDetails.LossDateTime)
 
+	key := c.InsuredDetails.SSN + c.VehicleDetails.VIN + c.LossDetails.LossDateTime
 	var dupClaim Claim  
-	bytes, err := stub.GetState(c.InsuredDetails.SSN + c.VehicleDetails.VIN + c.LossDetails.LossDateTime)
+	bytes, err := stub.GetState(key)
 	
-    err = json.Unmarshal(bytes, &dupClaim); 
+	if (bytes != nil ) {
+	    err = json.Unmarshal(bytes, &dupClaim); 
+	}
 
 	
 	if err != nil {
-		logger.Error("Could not fetch Claim application with Key "+c.InsuredDetails.SSN + c.VehicleDetails.VIN + c.LossDetails.LossDateTime+" from ledger", err)
+		logger.Error("Could not fetch Claim application with Key "+key+" from ledger", err)
 		return false, err
 	}
 	
