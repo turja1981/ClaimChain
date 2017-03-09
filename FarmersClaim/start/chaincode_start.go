@@ -294,6 +294,18 @@ func (t *SimpleChaincode) createAsset(stub shim.ChaincodeStubInterface, args []s
 		if (!flag) {
 			CLAIM_NO =  CLAIM_NO + 1
 			c.ClaimNo = strconv.Itoa(CLAIM_NO)
+			
+			// Adjuster Assigment 
+
+			c.AdjusterReport.AdjusterZipCode 	= c.LossDetails.LossZipCode
+			c.AdjusterReport.AdjusterSpeciality = "Collision"
+			c.AdjusterReport.AdjusterFirstName 	= "John"
+			c.AdjusterReport.AdjusterLastName 	= "Doe"
+			c.AdjusterReport.EvaluationDateTime = "03/02/2017"
+			c.AdjusterReport.ApproveLossAmount	= "3000.00"
+			c.RepairedDetails.RepairShopName	= "Quick Repair Shop"
+			c.RepairedDetails.RepairZipCode  	= c.LossDetails.LossZipCode
+			
 			_ , err = save_changes(stub , c)
 			
 			bytes, err = stub.GetState(c.ClaimNo)
@@ -364,14 +376,10 @@ func (t *SimpleChaincode) updateAsset(stub shim.ChaincodeStubInterface, args []s
 		var claimApplication Claim
 		err = json.Unmarshal(laBytes, &claimApplication)
 		
-		claimApplication.AdjusterReport.AdjusterFirstName 	= a.AdjusterFirstName
-		claimApplication.AdjusterReport.AdjusterLastName 	= a.AdjusterLastName
-		claimApplication.AdjusterReport.EvaluationDateTime 	= a.EvaluationDateTime
 		claimApplication.AdjusterReport.EvaluationDateTime 	= a.EvaluationDateTime
 		claimApplication.AdjusterReport.ApproveLossAmount 	= a.ApproveLossAmount
 		claimApplication.AdjusterReport.Remarks 			= a.Remarks
-		claimApplication.AdjusterReport.AdjusterZipCode		= a.AdjusterZipCode
-		claimApplication.Status								= "In Progress"
+		claimApplication.Status								= "Claim_Approved"
 		
 		laBytes, err = json.Marshal(&claimApplication)
 		
@@ -379,7 +387,7 @@ func (t *SimpleChaincode) updateAsset(stub shim.ChaincodeStubInterface, args []s
 		logger.Error("Could not marshal claim application post update", err)
 		return nil, err
 		}
-
+		
 		err = stub.PutState(claimNo, laBytes)
 		if err != nil {
 			logger.Error("Could not save claim application post update", err)
@@ -410,8 +418,6 @@ func (t *SimpleChaincode) updateAsset(stub shim.ChaincodeStubInterface, args []s
 		var claimApplication Claim
 		err = json.Unmarshal(laBytes, &claimApplication)
 		
-		claimApplication.RepairedDetails.RepairShopName 			= r.RepairShopName
-		claimApplication.RepairedDetails.RepairZipCode 				= r.RepairZipCode
 		claimApplication.RepairedDetails.ItemRepaired.ItemId 		= r.ItemRepaired.ItemId
 		claimApplication.RepairedDetails.ItemRepaired.ItemName 		= r.ItemRepaired.ItemName
 		claimApplication.RepairedDetails.ItemRepaired.ItemCost 		= r.ItemRepaired.ItemCost
