@@ -23,7 +23,7 @@ import (
 //	"net/http"
 //	"io/ioutil"
 //	"bytes"
-	//"strconv" 
+	"strconv" 
 	//"strings"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	"encoding/json"
@@ -138,7 +138,7 @@ type Sensor struct {
 }
 
 
-var int CLAIM_NO = 7000000
+var  CLAIM_NO = 7000000
 // ============================================================================================================================
 // Main
 // ============================================================================================================================
@@ -293,7 +293,7 @@ func (t *SimpleChaincode) createAsset(stub shim.ChaincodeStubInterface, args []s
 		flag , _  :=  t.checkFraudRecord(stub,c)
 		if (!flag) {
 			CLAIM_NO =  CLAIM_NO + 1
-			c.ClaimNo = CLAIM_NO
+			c.ClaimNo = strconv.Itoa(CLAIM_NO)
 			_ , err = save_changes(stub , c)
 			
 			bytes, err = stub.GetState(c.ClaimNo)
