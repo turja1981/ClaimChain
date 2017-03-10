@@ -84,11 +84,11 @@ type Adjuster struct {
 
 type RepairShop struct {
 	
-	RepairShopName			string		`json:"repairShopName,omitempty"` 
-	RepairZipCode			string		`json:"repairZipCode,omitempty"`	 
-	RepairDateTime			string		`json:"repairDateTime,omitempty"` 
-	ItemRepaired			RepairItem	`json:"itemRepaired,omitempty"` 
-	TotalCost	    		string		`json:"totalCost,omitempty"`
+	RepairShopName			string			`json:"repairShopName,omitempty"` 
+	RepairZipCode			string			`json:"repairZipCode,omitempty"`	 
+	RepairDateTime			string			`json:"repairDateTime,omitempty"` 
+	ItemRepaired			[]RepairItem	`json:"itemRepaired,omitempty"` 
+	TotalCost	    		string			`json:"totalCost,omitempty"`
 
 
 }
@@ -96,7 +96,7 @@ type RepairShop struct {
 type RepairItem struct {
 	 
 	ItemId					string		`json:"itemId,omitempty"`
-	ItemName				string		`json:"autoItem,omitempty"` 
+	ItemName				string		`json:"itemName,omitempty"` 
 	ItemCost				string		`json:"itemCost,omitempty"` 
 
 }
@@ -418,12 +418,17 @@ func (t *SimpleChaincode) updateAsset(stub shim.ChaincodeStubInterface, args []s
 		var claimApplication Claim
 		err = json.Unmarshal(laBytes, &claimApplication)
 		
-		claimApplication.RepairedDetails.ItemRepaired.ItemId 		= r.ItemRepaired.ItemId
-		claimApplication.RepairedDetails.ItemRepaired.ItemName 		= r.ItemRepaired.ItemName
-		claimApplication.RepairedDetails.ItemRepaired.ItemCost 		= r.ItemRepaired.ItemCost
+		for itemCount := range r.ItemRepaired {
+		
+		claimApplication.RepairedDetails.ItemRepaired[itemCount].ItemId 		= r.ItemRepaired[itemCount].ItemId
+		claimApplication.RepairedDetails.ItemRepaired[itemCount].ItemName 		= r.ItemRepaired[itemCount].ItemName
+		claimApplication.RepairedDetails.ItemRepaired[itemCount].ItemCost 		= r.ItemRepaired[itemCount].ItemCost
+	
+		}
+		
+		
 		claimApplication.RepairedDetails.RepairDateTime 			= r.RepairDateTime
 		claimApplication.RepairedDetails.TotalCost 					= r.TotalCost
-		
 		claimApplication.Status										= "Repair_Completed"
 		
 		laBytes, err = json.Marshal(&claimApplication)
