@@ -309,8 +309,8 @@ func (t *SimpleChaincode) createAsset(stub shim.ChaincodeStubInterface, args []s
 			c.RepairedDetails.RepairZipCode  	= c.LossDetails.LossZipCode
 			
 			c.RepairedDetails.ItemRepaired[0].ItemId = "0"
-			c.RepairedDetails.ItemRepaired[0].ItemId = "1"
-			c.RepairedDetails.ItemRepaired[0].ItemId = "2"
+			c.RepairedDetails.ItemRepaired[1].ItemId = "1"
+			c.RepairedDetails.ItemRepaired[2].ItemId = "2"
 			
 			_ , err = save_changes(stub , c)
 			
