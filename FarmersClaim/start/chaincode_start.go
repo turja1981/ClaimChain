@@ -531,16 +531,19 @@ func save_changes(stub shim.ChaincodeStubInterface, c Claim) (bool, error) {
 
 	bytes, err := json.Marshal(c)
 
-	if err != nil { fmt.Printf("SAVE_CHANGES: Error converting vehicle record: %s", err); return false, errors.New("Error converting claim record") }
+	if err != nil { logger.Error("SAVE_CHANGES: Error converting vehicle record: ", err); return false, errors.New("Error converting claim record") }
 
 	key := c.InsuredDetails.SSN + c.VehicleDetails.VIN + c.LossDetails.LossDateTime
+	
+	logger.Debug("____________Save_changes for the key :- "+key)
+	
 	err = stub.PutState(key, bytes)
 
-	if err != nil { fmt.Printf("SAVE_CHANGES: Error storing vehicle record: %s", err); return false, errors.New("Error storing claim record") }
+	if err != nil { logger.Error("SAVE_CHANGES: Error storing Claim record:", err); return false, errors.New("Error storing claim record") }
 
 	err = stub.PutState(c.ClaimNo, bytes)
 	
-	if err != nil { fmt.Printf("SAVE_CHANGES: Error storing vehicle record: %s", err); return false, errors.New("Error storing claim record") }
+	if err != nil { logger.Error("SAVE_CHANGES: Error storing Claim record: ", err); return false, errors.New("Error storing claim record") }
 	
 	logger.Debug("Save Complete for the key :- "+c.ClaimNo)
 	return true, nil
