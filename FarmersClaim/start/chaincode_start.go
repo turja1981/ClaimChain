@@ -415,7 +415,7 @@ func (t *SimpleChaincode) updateAsset(stub shim.ChaincodeStubInterface, args []s
 			logger.Error("Could not fetch claim application from ledger", err)
 			return nil, err
 		}
-		var claimApplication Claim
+		var claimApplication Claim 
 		err = json.Unmarshal(laBytes, &claimApplication)
 		
 		for index, each := range r.ItemRepaired {
