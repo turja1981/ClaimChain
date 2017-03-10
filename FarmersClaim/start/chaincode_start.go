@@ -87,7 +87,7 @@ type RepairShop struct {
 	RepairShopName			string			`json:"repairShopName,omitempty"` 
 	RepairZipCode			string			`json:"repairZipCode,omitempty"`	 
 	RepairDateTime			string			`json:"repairDateTime,omitempty"` 
-	ItemRepaired			[]RepairItem	`json:"itemRepaired,omitempty"` 
+	ItemRepaired			[5]RepairItem	`json:"itemRepaired,omitempty"` 
 	TotalCost	    		string			`json:"totalCost,omitempty"`
 
 
@@ -303,8 +303,14 @@ func (t *SimpleChaincode) createAsset(stub shim.ChaincodeStubInterface, args []s
 			c.AdjusterReport.AdjusterLastName 	= "Doe"
 			c.AdjusterReport.EvaluationDateTime = "03/02/2017"
 			c.AdjusterReport.ApproveLossAmount	= "3000.00"
+
+
 			c.RepairedDetails.RepairShopName	= "Quick Repair Shop"
 			c.RepairedDetails.RepairZipCode  	= c.LossDetails.LossZipCode
+			
+			c.RepairedDetails.ItemRepaired[0].ItemId = "0"
+			c.RepairedDetails.ItemRepaired[0].ItemId = "1"
+			c.RepairedDetails.ItemRepaired[0].ItemId = "2"
 			
 			_ , err = save_changes(stub , c)
 			
@@ -420,10 +426,13 @@ func (t *SimpleChaincode) updateAsset(stub shim.ChaincodeStubInterface, args []s
 		
 		for index, each := range r.ItemRepaired {
 		
-	//	claimApplication.RepairedDetails.ItemRepaired[index].ItemId 		= r.ItemRepaired[index].ItemId
-	//	claimApplication.RepairedDetails.ItemRepaired[index].ItemName 		= r.ItemRepaired[index].ItemName
-	//	claimApplication.RepairedDetails.ItemRepaired[index].ItemCost 		= r.ItemRepaired[index].ItemCost
+			claimApplication.RepairedDetails.ItemRepaired[index].ItemId 		= r.ItemRepaired[index].ItemId
+			claimApplication.RepairedDetails.ItemRepaired[index].ItemName 		= r.ItemRepaired[index].ItemName
+			claimApplication.RepairedDetails.ItemRepaired[index].ItemCost 		= r.ItemRepaired[index].ItemCost
 	
+			logger.Debug("Divine value each item >>", r.ItemRepaired[index].ItemId)
+			
+			
 			logger.Debug("Divine value [%d] is [%s]\n", index, each)
 		}
 		
