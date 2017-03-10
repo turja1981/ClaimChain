@@ -418,11 +418,11 @@ func (t *SimpleChaincode) updateAsset(stub shim.ChaincodeStubInterface, args []s
 		var claimApplication Claim
 		err = json.Unmarshal(laBytes, &claimApplication)
 		
-		for itemCount := range r.ItemRepaired {
+		for index, each := range r.ItemRepaired {
 		
-		claimApplication.RepairedDetails.ItemRepaired[itemCount].ItemId 		= r.ItemRepaired[itemCount].ItemId
-		claimApplication.RepairedDetails.ItemRepaired[itemCount].ItemName 		= r.ItemRepaired[itemCount].ItemName
-		claimApplication.RepairedDetails.ItemRepaired[itemCount].ItemCost 		= r.ItemRepaired[itemCount].ItemCost
+		claimApplication.RepairedDetails.ItemRepaired[index].ItemId 		= r.ItemRepaired[index].ItemId
+		claimApplication.RepairedDetails.ItemRepaired[index].ItemName 		= r.ItemRepaired[index].ItemName
+		claimApplication.RepairedDetails.ItemRepaired[index].ItemCost 		= r.ItemRepaired[index].ItemCost
 	
 		}
 		
