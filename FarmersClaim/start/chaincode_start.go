@@ -420,9 +420,9 @@ func (t *SimpleChaincode) updateAsset(stub shim.ChaincodeStubInterface, args []s
 		
 		for index, each := range r.ItemRepaired {
 		
-		claimApplication.RepairedDetails.ItemRepaired[index].ItemId 		= r.ItemRepaired[index].ItemId
-		claimApplication.RepairedDetails.ItemRepaired[index].ItemName 		= r.ItemRepaired[index].ItemName
-		claimApplication.RepairedDetails.ItemRepaired[index].ItemCost 		= r.ItemRepaired[index].ItemCost
+	//	claimApplication.RepairedDetails.ItemRepaired[index].ItemId 		= r.ItemRepaired[index].ItemId
+	//	claimApplication.RepairedDetails.ItemRepaired[index].ItemName 		= r.ItemRepaired[index].ItemName
+	//	claimApplication.RepairedDetails.ItemRepaired[index].ItemCost 		= r.ItemRepaired[index].ItemCost
 	
 			logger.Debug("Divine value [%d] is [%s]\n", index, each)
 		}
