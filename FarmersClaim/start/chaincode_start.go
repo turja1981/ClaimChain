@@ -22,7 +22,7 @@ import (
 	"fmt"
 //	"net/http"
 //	"io/ioutil"
-//	"bytes"
+//	"time"
 	"strconv" 
 	//"strings"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
@@ -37,6 +37,14 @@ var logger = shim.NewLogger("ClaimChaincode")
 // SimpleChaincode example simple Chaincode implementation
 type SimpleChaincode struct {
 }
+
+type customEvent struct {
+	Type       					string `json:"type"`
+	Decription 					string `json:"description"`
+	Owner	   					string `json:"owner"`
+//	TransactionTime  			Time `json:"transactionTime"`
+}
+
 
 
 type Vehicle struct {
@@ -314,29 +322,42 @@ func (t *SimpleChaincode) createAsset(stub shim.ChaincodeStubInterface, args []s
 			
 			_ , err = save_changes(stub , c)
 			
+			if err != nil {
+				logger.Error("Could not save claim to ledger", err)
+				return nil, err
+			}
+			
 			bytes, err = stub.GetState(c.ClaimNo)
 			
 			err = json.Unmarshal(bytes, &c); 
 			
+			var customEvent = "{'Claim No:" + c.ClaimNo +" and Insured Name :"+c.InsuredDetails.FirstName+" "+c.InsuredDetails.FirstName+"  Created Successfully'}"
+			err = stub.SetEvent("Claim_Notification", []byte(customEvent))
+			if err != nil {
+				return nil, err
+			}
+			
 		} else {
 			returnMsg := "{"+"\"ReturnMessage\""+":"+"\"Poteltial Duplicate Claim\""+"}" 
 			bytes = (([]byte)(returnMsg))
+		
+			var customEvent = "{'!!!! Potential Fraud Claim  !!!! Insured Name :"+c.InsuredDetails.FirstName+" "+c.InsuredDetails.FirstName+" , Policy No:" + c.PolicyNo + " Rejected Successfully'}"
+			err = stub.SetEvent("Claim_Notification", []byte(customEvent))
+			if err != nil {
+				return nil, err
+			}
+			
+			
+			return nil, errors.New(returnMsg)
 		}
 		
 		
 
-	if err != nil {
-		logger.Error("Could not save claim  to ledger", err)
-		return nil, err
-	}
 
-	var customEvent = "{eventType: 'claimApplicationCreation', description:" + c.ClaimNo + "' Successfully created'}"
-	err = stub.SetEvent("Claim_Verification", []byte(customEvent))
-	if err != nil {
-		return nil, err
-	}
+
+
 	
-	logger.Info("Returning from create claim application :"+c.ClaimNo)
+	logger.Info("______Returning from create claim application :"+c.ClaimNo)
 	return bytes, nil
 
 }
@@ -400,8 +421,8 @@ func (t *SimpleChaincode) updateAsset(stub shim.ChaincodeStubInterface, args []s
 			return nil, err
 		}
 		
-		var customEvent = "{eventType: 'claimApplicationUpdate', description:" + claimNo + "' : Investigation Report Submitted'}"
-		err = stub.SetEvent("Investigation_Report", []byte(customEvent))
+		var customEvent = "{'Claim No:" + claimApplication.ClaimNo +" and Adjuster Loss Approve amount :"+claimApplication.AdjusterReport.ApproveLossAmount+"  updated Successfully'}"
+		err = stub.SetEvent("Claim_Investigation_Report", []byte(customEvent))
 		if err != nil {
 			return nil, err
 		}
@@ -454,8 +475,8 @@ func (t *SimpleChaincode) updateAsset(stub shim.ChaincodeStubInterface, args []s
 			return nil, err
 		}
 		
-		var customEvent = "{eventType: 'claimApplicationUpdate', description:" + claimNo + "' : Repair Invoice Submitted'}"
-		err = stub.SetEvent("Repair_Invoice", []byte(customEvent))
+		var customEvent = "{'Claim No:" + claimApplication.ClaimNo +" and Repair Total Cost Amount :"+claimApplication.RepairedDetails.TotalCost+"  updated Successfully'}"
+		err = stub.SetEvent("Claim_Repair_Invoice", []byte(customEvent))
 		if err != nil {
 			return nil, err
 		}
@@ -495,8 +516,8 @@ func (t *SimpleChaincode) updateAsset(stub shim.ChaincodeStubInterface, args []s
 			return nil, err
 		}
 		
-		var customEvent = "{eventType: 'claimApplicationUpdate', description:" + claimNo + "' : Payment Processed'}"
-		err = stub.SetEvent("Bank_Payment", []byte(customEvent))
+		var customEvent = "{'Claim No:" + claimApplication.ClaimNo +" and Payment Amount :"+claimApplication.PaymentDetails.PaymentAmount+"  updated Successfully'}"
+		err = stub.SetEvent("Claim_Bank_Payment", []byte(customEvent))
 		if err != nil {
 			return nil, err
 		}
@@ -520,10 +541,6 @@ func GetCertAttribute(stub shim.ChaincodeStubInterface, attributeName string) (s
 
 
 
-type customEvent struct {
-	Type       string `json:"type"`
-	Decription string `json:"description"`
-}
 
 
 
