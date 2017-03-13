@@ -331,7 +331,7 @@ func (t *SimpleChaincode) createAsset(stub shim.ChaincodeStubInterface, args []s
 			
 			err = json.Unmarshal(bytes, &c); 
 			
-			var customEvent = "{'Claim No:" + c.ClaimNo +" and Insured Name :"+c.InsuredDetails.FirstName+" "+c.InsuredDetails.FirstName+"  Created Successfully'}"
+			var customEvent = "{\"ClaimNo\":\"" + c.ClaimNo +"\" ,  \"InsuredName\" :\""+c.InsuredDetails.FirstName+" "+c.InsuredDetails.LastName+"\" , \"Desc\":\"Claim  Created Successfully\"}"
 			err = stub.SetEvent("Claim_Notification", []byte(customEvent))
 			if err != nil {
 				return nil, err
@@ -341,7 +341,7 @@ func (t *SimpleChaincode) createAsset(stub shim.ChaincodeStubInterface, args []s
 			returnMsg := "{"+"\"ReturnMessage\""+":"+"\"Poteltial Duplicate Claim\""+"}" 
 			bytes = (([]byte)(returnMsg))
 		
-			var customEvent = "{'!!!! Potential Fraud Claim  !!!! Insured Name :"+c.InsuredDetails.FirstName+" "+c.InsuredDetails.FirstName+" , Policy No:" + c.PolicyNo + " Rejected Successfully'}"
+			var customEvent = "{'!!!! Potential Fraud Claim  !!!! Insured Name :"+c.InsuredDetails.FirstName+" "+c.InsuredDetails.LastName+" , Policy No:" + c.PolicyNo + " Rejected Successfully'}"
 			err = stub.SetEvent("Claim_Notification", []byte(customEvent))
 			if err != nil {
 				return nil, err
