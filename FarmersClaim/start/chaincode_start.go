@@ -341,7 +341,7 @@ func (t *SimpleChaincode) createAsset(stub shim.ChaincodeStubInterface, args []s
 			returnMsg := "{"+"\"ReturnMessage\""+":"+"\"Poteltial Duplicate Claim\""+"}" 
 			bytes = (([]byte)(returnMsg))
 		
-			var customEvent = "{'!!!! Potential Fraud Claim  !!!! Insured Name :"+c.InsuredDetails.FirstName+" "+c.InsuredDetails.LastName+" , Policy No:" + c.PolicyNo + " Rejected Successfully'}"
+			var customEvent = "{\"ClaimNo\":\"Not Generated , Policy-" + c.PolicyNo +"\" ,  \"InsuredName\" :\""+c.InsuredDetails.FirstName+" "+c.InsuredDetails.LastName+"\" , \"Desc\":\"Potential Fraud Claim\"}"
 			err = stub.SetEvent("Claim_Notification", []byte(customEvent))
 			if err != nil {
 				return nil, err
@@ -421,7 +421,7 @@ func (t *SimpleChaincode) updateAsset(stub shim.ChaincodeStubInterface, args []s
 			return nil, err
 		}
 		
-		var customEvent = "{'Claim No:" + claimApplication.ClaimNo +" and Adjuster Loss Approve amount :"+claimApplication.AdjusterReport.ApproveLossAmount+"  updated Successfully'}"
+		var customEvent = "{\"ClaimNo\":\"" + claimApplication.ClaimNo +"\" ,  \"InsuredName\" :\""+claimApplication.InsuredDetails.FirstName+" "+claimApplication.InsuredDetails.LastName+"\" , \"Desc\":\"Investigation Report Submitted Successfully\"}"
 		err = stub.SetEvent("Claim_Investigation_Report", []byte(customEvent))
 		if err != nil {
 			return nil, err
@@ -475,7 +475,7 @@ func (t *SimpleChaincode) updateAsset(stub shim.ChaincodeStubInterface, args []s
 			return nil, err
 		}
 		
-		var customEvent = "{'Claim No:" + claimApplication.ClaimNo +" and Repair Total Cost Amount :"+claimApplication.RepairedDetails.TotalCost+"  updated Successfully'}"
+		var customEvent = "{\"ClaimNo\":\"" + claimApplication.ClaimNo +"\" ,  \"InsuredName\" :\""+claimApplication.InsuredDetails.FirstName+" "+claimApplication.InsuredDetails.LastName+"\" , \"Desc\":\"Repair Invoice Submitted Successfully\"}"
 		err = stub.SetEvent("Claim_Repair_Invoice", []byte(customEvent))
 		if err != nil {
 			return nil, err
@@ -516,7 +516,7 @@ func (t *SimpleChaincode) updateAsset(stub shim.ChaincodeStubInterface, args []s
 			return nil, err
 		}
 		
-		var customEvent = "{'Claim No:" + claimApplication.ClaimNo +" and Payment Amount :"+claimApplication.PaymentDetails.PaymentAmount+"  updated Successfully'}"
+		var customEvent = "{\"ClaimNo\":\"" + claimApplication.ClaimNo +"\" ,  \"InsuredName\" :\""+claimApplication.InsuredDetails.FirstName+" "+claimApplication.InsuredDetails.LastName+"\" , \"Desc\":\"Payment for Repair Submitted Successfully\"}"
 		err = stub.SetEvent("Claim_Bank_Payment", []byte(customEvent))
 		if err != nil {
 			return nil, err
