@@ -585,7 +585,11 @@ func (t *SimpleChaincode) checkFraudRecord(stub shim.ChaincodeStubInterface , c 
 
 	key := c.InsuredDetails.SSN + c.VehicleDetails.VIN + c.LossDetails.LossDateTime
 	
+	logger.Debug("checkFraudRecord with Key "+key+" from ledger")
+	
 	thkey :=  c.ThirdPartyInsuredDetails.SSN + c.ThirdPartyVehicleDetails.VIN + c.LossDetails.LossDateTime
+	
+	logger.Debug("checkFraudRecord with Key "+thkey+" from ledger")
 	
 	var dupClaim Claim  
 	bytes, err := stub.GetState(key)
@@ -605,31 +609,26 @@ func (t *SimpleChaincode) checkFraudRecord(stub shim.ChaincodeStubInterface , c 
 	}
 
 	
-	bytes, err = stub.GetState(thkey)
-	
-	if (bytes != nil ) {
-	    err = json.Unmarshal(bytes, &dupClaim); 
-	    
-	    if err != nil {
-			logger.Error("Could not fetch Claim application with Key "+key+" from ledger", err)
-			
-		}
-	}
-
-	
-	bytes, err = stub.GetState(thkey)
-	
-	if (bytes != nil ) {
-	    err = json.Unmarshal(bytes, &dupClaim); 
-	}
-
-
-	if (c.ThirdPartyInsuredDetails.SSN == dupClaim.InsuredDetails.SSN && c.ThirdPartyVehicleDetails.VIN == dupClaim.VehicleDetails.VIN &&  c.LossDetails.LossDateTime == dupClaim.LossDetails.LossDateTime ) {
+	if (c.InsuredDetails.SSN == dupClaim.InsuredDetails.SSN && c.VehicleDetails.VIN == dupClaim.VehicleDetails.VIN &&  c.LossDetails.LossDateTime == dupClaim.LossDetails.LossDateTime ) {
 		logger.Debug("Duplicate Claim Found with Key :-"+dupClaim.InsuredDetails.SSN + dupClaim.VehicleDetails.VIN + dupClaim.LossDetails.LossDateTime)
 		return true , nil 
 	}
+
+	if ( len(thkey) > 0) {
+	
+		bytes, err = stub.GetState(thkey)
+		
+		if (bytes != nil ) {
+		    err = json.Unmarshal(bytes, &dupClaim); 
+		}
 	
 	
+		if (c.ThirdPartyInsuredDetails.SSN == dupClaim.InsuredDetails.SSN && c.ThirdPartyVehicleDetails.VIN == dupClaim.VehicleDetails.VIN &&  c.LossDetails.LossDateTime == dupClaim.LossDetails.LossDateTime ) {
+			logger.Debug("Duplicate Claim Found with Key :-"+dupClaim.InsuredDetails.SSN + dupClaim.VehicleDetails.VIN + dupClaim.LossDetails.LossDateTime)
+			return true , nil 
+		}
+	
+	}
 		
 	return false, nil
 	
