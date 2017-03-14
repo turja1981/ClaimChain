@@ -586,9 +586,25 @@ func (t *SimpleChaincode) checkFraudRecord(stub shim.ChaincodeStubInterface , c 
 	
 	if (bytes != nil ) {
 	    err = json.Unmarshal(bytes, &dupClaim); 
+	    
+	    if err != nil {
+		logger.Error("Could not fetch Claim application with Key "+key+" from ledger", err)
+		return true, nil
+		}
+	}
+	
+	bytes, err = stub.GetState(thkey)
+	
+	if (bytes != nil ) {
+	    err = json.Unmarshal(bytes, &dupClaim); 
+	    
+	    if err != nil {
+			logger.Error("Could not fetch Claim application with Key "+key+" from ledger", err)
+			return true, nil
+		}
 	}
 
-	
+	/*
 	if err != nil {
 		logger.Error("Could not fetch Claim application with Key "+key+" from ledger", err)
 		return false, err
@@ -611,7 +627,7 @@ func (t *SimpleChaincode) checkFraudRecord(stub shim.ChaincodeStubInterface , c 
 		return true , nil 
 	}
 	
-	
+	*/
 		
 	return false, nil
 	
