@@ -562,14 +562,20 @@ func save_changes(stub shim.ChaincodeStubInterface, c Claim) (bool, error) {
 
 	if err != nil { logger.Error("SAVE_CHANGES: Error storing Claim record:", err); return false, errors.New("Error storing claim record") }
 	
+	logger.Debug("____________Save_changes for the key :- "+key)
+	
 	err = stub.PutState(thKey, bytes)
 
 	if err != nil { logger.Error("SAVE_CHANGES: Error storing Claim record:", err); return false, errors.New("Error storing claim record") }
+	
+	logger.Debug("____________Save_changes for the Thirtd party Key :- "+thKey)
 
 	err = stub.PutState(c.ClaimNo, bytes)
 	
 	if err != nil { logger.Error("SAVE_CHANGES: Error storing Claim record: ", err); return false, errors.New("Error storing claim record") }
 	logger.Debug("Save Complete for the key :- "+c.ClaimNo)
+	
+	logger.Debug("____________Save_changes for the Claim :- "+c.ClaimNo)
 	
 	return true, nil
 }
@@ -589,9 +595,15 @@ func (t *SimpleChaincode) checkFraudRecord(stub shim.ChaincodeStubInterface , c 
 	    
 	    if err != nil {
 		logger.Error("Could not fetch Claim application with Key "+key+" from ledger", err)
-		return true, nil
+		
 		}
 	}
+	
+	if (c.InsuredDetails.SSN == dupClaim.ThirdPartyInsuredDetails.SSN && c.VehicleDetails.VIN == dupClaim.ThirdPartyVehicleDetails.VIN &&  c.LossDetails.LossDateTime == dupClaim.LossDetails.LossDateTime ) {
+		logger.Debug("Duplicate Claim Found with Key :-"+dupClaim.ThirdPartyInsuredDetails.SSN + dupClaim.ThirdPartyVehicleDetails.VIN + dupClaim.LossDetails.LossDateTime)
+		return true , nil 
+	}
+
 	
 	bytes, err = stub.GetState(thkey)
 	
@@ -600,20 +612,10 @@ func (t *SimpleChaincode) checkFraudRecord(stub shim.ChaincodeStubInterface , c 
 	    
 	    if err != nil {
 			logger.Error("Could not fetch Claim application with Key "+key+" from ledger", err)
-			return true, nil
+			
 		}
 	}
 
-	/*
-	if err != nil {
-		logger.Error("Could not fetch Claim application with Key "+key+" from ledger", err)
-		return false, err
-	}
-	
-	if (c.InsuredDetails.SSN == dupClaim.ThirdPartyInsuredDetails.SSN && c.VehicleDetails.VIN == dupClaim.ThirdPartyVehicleDetails.VIN &&  c.LossDetails.LossDateTime == dupClaim.LossDetails.LossDateTime ) {
-		logger.Debug("Duplicate Claim Found with Key :-"+dupClaim.ThirdPartyInsuredDetails.SSN + dupClaim.ThirdPartyVehicleDetails.VIN + dupClaim.LossDetails.LossDateTime)
-		return true , nil 
-	}
 	
 	bytes, err = stub.GetState(thkey)
 	
@@ -627,7 +629,7 @@ func (t *SimpleChaincode) checkFraudRecord(stub shim.ChaincodeStubInterface , c 
 		return true , nil 
 	}
 	
-	*/
+	
 		
 	return false, nil
 	
