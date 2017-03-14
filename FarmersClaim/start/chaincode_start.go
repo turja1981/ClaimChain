@@ -79,7 +79,7 @@ type Insured struct {
 
 type Adjuster struct {
 	 
-	AdjusterZipCode			string		`json:"djusterZipCode,omitempty"`
+	AdjusterZipCode			string		`json:"adjusterZipCode,omitempty"`
 	AdjusterSpeciality		string		`json:"adjusterSpeciality,omitempty"`
 	AdjusterFirstName		string		`json:"adjusterFirstName,omitempty"`
 	AdjusterLastName		string		`json:"adjusterLastName,omitempty"`
@@ -122,17 +122,19 @@ type Payment struct {
 
 type Claim struct {
 	 
-	ClaimNo	    		string		`json:"claimNo,omitempty"`	 
-	PolicyNo			string		`json:"policyNo,omitempty"` 
-	Status              string      `json:"status,omitempty"`
-	ExternalReport      string      `json:"externalReport,omitempty"`
-	LossDetails 		Loss 		`json:"lossDetails,omitempty"`
-	InsuredDetails 		Insured 	`json:"insuredDetails,omitempty"`
-	VehicleDetails 		Vehicle 	`json:"vehicleDetails,omitempty"`
-	AdjusterReport 		Adjuster 	`json:"adjusterReport,omitempty"`
-	RepairedDetails 	RepairShop 	`json:"repairedDetails,omitempty"`
-	PaymentDetails 		Payment 	`json:"paymentDetails,omitempty"`
-	SensorData 		    Sensor 		`json:"sensorData,omitempty"`
+	ClaimNo	    				string		`json:"claimNo,omitempty"`	 
+	PolicyNo					string		`json:"policyNo,omitempty"` 
+	Status              		string      `json:"status,omitempty"`
+	ExternalReport      		string      `json:"externalReport,omitempty"`
+	LossDetails 				Loss 		`json:"lossDetails,omitempty"`
+	InsuredDetails 				Insured 	`json:"insuredDetails,omitempty"`
+	VehicleDetails 				Vehicle 	`json:"vehicleDetails,omitempty"`
+	ThirdPartyInsuredDetails	Insured 	`json:"thirdPartyDetails,omitempty"`
+	ThirdPartyVehicleDetails	Vehicle 	`json:"thirdPartyDetails,omitempty"`
+	AdjusterReport 				Adjuster 	`json:"adjusterReport,omitempty"`
+	RepairedDetails 			RepairShop 	`json:"repairedDetails,omitempty"`
+	PaymentDetails 				Payment 	`json:"paymentDetails,omitempty"`
+	SensorData 		    		Sensor 		`json:"sensorData,omitempty"`
 
 }
 
@@ -341,7 +343,7 @@ func (t *SimpleChaincode) createAsset(stub shim.ChaincodeStubInterface, args []s
 			returnMsg := "{"+"\"ReturnMessage\""+":"+"\"Poteltial Duplicate Claim\""+"}" 
 			bytes = (([]byte)(returnMsg))
 		
-			var customEvent = "{\"ClaimNo\":\"Not Generated , Policy-" + c.PolicyNo +"\" ,  \"InsuredName\" :\""+c.InsuredDetails.FirstName+" "+c.InsuredDetails.LastName+"\" , \"Desc\":\"Potential Fraud Claim\"}"
+			var customEvent = "{\"PolicyNo\":\"" + c.PolicyNo +"\" ,  \"InsuredName\" :\""+c.InsuredDetails.FirstName+" "+c.InsuredDetails.LastName+"\" , \"Desc\":\"Potential Fraud Claim\"}"
 			err = stub.SetEvent("Claim_Notification", []byte(customEvent))
 			if err != nil {
 				return nil, err
@@ -552,17 +554,23 @@ func save_changes(stub shim.ChaincodeStubInterface, c Claim) (bool, error) {
 
 	key := c.InsuredDetails.SSN + c.VehicleDetails.VIN + c.LossDetails.LossDateTime
 	
+	thKey := c.ThirdPartyInsuredDetails.SSN + c.ThirdPartyVehicleDetails.VIN + c.LossDetails.LossDateTime
+	
 	logger.Debug("____________Save_changes for the key :- "+key)
 	
 	err = stub.PutState(key, bytes)
+
+	if err != nil { logger.Error("SAVE_CHANGES: Error storing Claim record:", err); return false, errors.New("Error storing claim record") }
+	
+	err = stub.PutState(thKey, bytes)
 
 	if err != nil { logger.Error("SAVE_CHANGES: Error storing Claim record:", err); return false, errors.New("Error storing claim record") }
 
 	err = stub.PutState(c.ClaimNo, bytes)
 	
 	if err != nil { logger.Error("SAVE_CHANGES: Error storing Claim record: ", err); return false, errors.New("Error storing claim record") }
-	
 	logger.Debug("Save Complete for the key :- "+c.ClaimNo)
+	
 	return true, nil
 }
 
@@ -570,6 +578,9 @@ func (t *SimpleChaincode) checkFraudRecord(stub shim.ChaincodeStubInterface , c 
 	logger.Debug("Entering checkFraudRecord for the key :- "+c.InsuredDetails.SSN + c.VehicleDetails.VIN + c.LossDetails.LossDateTime)
 
 	key := c.InsuredDetails.SSN + c.VehicleDetails.VIN + c.LossDetails.LossDateTime
+	
+	thkey :=  c.ThirdPartyInsuredDetails.SSN + c.ThirdPartyVehicleDetails.VIN + c.LossDetails.LossDateTime
+	
 	var dupClaim Claim  
 	bytes, err := stub.GetState(key)
 	
@@ -583,10 +594,24 @@ func (t *SimpleChaincode) checkFraudRecord(stub shim.ChaincodeStubInterface , c 
 		return false, err
 	}
 	
-	if (dupClaim.InsuredDetails.SSN == c.InsuredDetails.SSN && c.VehicleDetails.VIN == dupClaim.VehicleDetails.VIN &&  c.LossDetails.LossDateTime == dupClaim.LossDetails.LossDateTime ) {
+	if (c.InsuredDetails.SSN == dupClaim.ThirdPartyInsuredDetails.SSN && c.VehicleDetails.VIN == dupClaim.ThirdPartyVehicleDetails.VIN &&  c.LossDetails.LossDateTime == dupClaim.LossDetails.LossDateTime ) {
+		logger.Debug("Duplicate Claim Found with Key :-"+dupClaim.ThirdPartyInsuredDetails.SSN + dupClaim.ThirdPartyVehicleDetails.VIN + dupClaim.LossDetails.LossDateTime)
+		return true , nil 
+	}
+	
+	bytes, err = stub.GetState(thkey)
+	
+	if (bytes != nil ) {
+	    err = json.Unmarshal(bytes, &dupClaim); 
+	}
+
+
+	if (c.ThirdPartyInsuredDetails.SSN == dupClaim.InsuredDetails.SSN && c.ThirdPartyVehicleDetails.VIN == dupClaim.VehicleDetails.VIN &&  c.LossDetails.LossDateTime == dupClaim.LossDetails.LossDateTime ) {
 		logger.Debug("Duplicate Claim Found with Key :-"+dupClaim.InsuredDetails.SSN + dupClaim.VehicleDetails.VIN + dupClaim.LossDetails.LossDateTime)
 		return true , nil 
 	}
+	
+	
 		
 	return false, nil
 	
