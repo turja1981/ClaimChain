@@ -129,8 +129,8 @@ type Claim struct {
 	LossDetails 				Loss 		`json:"lossDetails,omitempty"`
 	InsuredDetails 				Insured 	`json:"insuredDetails,omitempty"`
 	VehicleDetails 				Vehicle 	`json:"vehicleDetails,omitempty"`
-	ThirdPartyInsuredDetails	Insured 	`json:"thirdPartyDetails,omitempty"`
-	ThirdPartyVehicleDetails	Vehicle 	`json:"thirdPartyDetails,omitempty"`
+	ThirdPartyInsuredDetails	Insured 	`json:"thirdPartyInsuredDetails,omitempty"`
+	ThirdPartyVehicleDetails	Vehicle 	`json:"thirdPartyVehicleDetails,omitempty"`
 	AdjusterReport 				Adjuster 	`json:"adjusterReport,omitempty"`
 	RepairedDetails 			RepairShop 	`json:"repairedDetails,omitempty"`
 	PaymentDetails 				Payment 	`json:"paymentDetails,omitempty"`
