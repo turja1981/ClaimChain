@@ -343,7 +343,7 @@ func (t *SimpleChaincode) createAsset(stub shim.ChaincodeStubInterface, args []s
 			returnMsg := "{"+"\"ReturnMessage\""+":"+"\"Poteltial Duplicate Claim\""+"}" 
 			bytes = (([]byte)(returnMsg))
 		
-			var customEvent = "{\"PolicyNo\":\"" + c.PolicyNo +"\" ,  \"InsuredName\" :\""+c.InsuredDetails.FirstName+" "+c.InsuredDetails.LastName+"\" , \"Desc\":\"Potential Fraud Claim\"}"
+			var customEvent = "{\"PolicyNo\":\"" + c.PolicyNo +"\" ,  \"InsuredName\" :\""+c.InsuredDetails.FirstName+" "+c.InsuredDetails.LastName+"\" , \"Desc\":\"Potential Fraud Claim with SSN :"+c.InsuredDetails.SSN+" VIN :"+c.VehicleDetails.VIN +" and Loss Date:"+c.LossDetails.LossDateTime+"\" }"
 			err = stub.SetEvent("Claim_Notification", []byte(customEvent))
 			if err != nil {
 				return nil, err
