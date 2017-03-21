@@ -11,31 +11,15 @@ var schemas = `
                     "items": {
                         "description": "A set of fields that constitute the writable fields in an asset's state. AssetID is mandatory along with at least one writable field. In this contract pattern, a partial state is used as an event.",
                         "properties": {
-                            "claimId": {
-                                "description": "The ID of a managed Claim. The resource focal point for a smart contract.",
-                                "type": "string"
-                            },
-                            "policyNo": {
+                           "policyNo": {
                                 "description": "Policy Number",
                                 "type": "string"
                             },
-                            "claimNo": {
-                                "description": "Claim Number",
-                                "type": "string"
-                            },
-                            "estmLossAmount": {
-                                "description": "EstmLossAmount",
-                                "type": "string"
-                            },
-                            "status": {
+                             "status": {
                                 "description": "Status",
                                 "type": "string"
                             },
-                            "externalReport": {
-                                "description": "ExternalReport",
-                                "type": "string"
-                            },
-                            
+                                                      
                             "lossDetails": {
                                 "description": "lossDetails",
                                 "properties": {
@@ -88,7 +72,35 @@ var schemas = `
 	                            },
 	                            "type": "object"
 	                        },
+	                         "thirdPartyInsuredDetails": {
+	                            "description": "insuredDetails",
+	                            "properties": {
+	                                "firstName": {
+	                                    "type": "string"
+	                                },
+	                                "lastName":{
+	                                    "type": "string"
+	                                },
+
+	                                "ssn": {
+	                                    "type": "string"
+	                                },
+
+	                            },
+	                            "type": "object"
+	                        },
 	                         "vehicleDetails": {
+	                            "description": "vehicleDetails",
+	                            "properties": {
+
+	                                "vin":{
+	                                    "type": "string"
+	                                }
+
+	                             },
+	                            "type": "object"
+	                        },
+                         "thirdPartyVehicleDetails": {
 	                            "description": "vehicleDetails",
 	                            "properties": {
 	                                "make": {
@@ -105,80 +117,9 @@ var schemas = `
 	                                }
 	                             },
 	                            "type": "object"
-	                        },
-	                        
-	                      "adjusterReport": {
-	                            "description": "adjusterReport",
-	                            "properties": {
-	                                "evaluationDateTime": {
-	                                    "type": "string"
-	                                },
-	                                "lossAmount":{
-	                                    "type": "string"
-	                                },
-	                                "remarks":{
-	                                    "type": "string"
-	                                }
-	                             },
-	                            "type": "object"
-	                        },  
-	                        
-	                     "repairedDetails": {
-	                            "description": "repairedDetails",
-	                            "properties": {
-	                                "repairDateTime": {
-	                                    "type": "string"
-	                                },
-	                                "itemRepaired":{
-	                                    "type": "string"
-	                                },
-	                                "cost":{
-	                                    "type": "string"
-	                                }
-	                             },
-	                            "type": "object"
-	                        },  
-	                         
-	                     "paymentDetails": {
-	                            "description": "repairedDetails",
-	                            "properties": {
-	                                "accountNo": {
-	                                    "type": "string"
-	                                },
-	                                "paymentAmount":{
-	                                    "type": "string"
-	                                },
-	                                "paymentDateTime":{
-	                                    "type": "string"
-	                                }
-	                             },
-	                            "type": "object"
-	                        }, 
-	                        
-	                     "sensorData": {
-	                            "description": "sensorData",
-	                            "properties": {
-	                                "latitude": {
-	                                    "type": "string"
-	                                },
-	                                "longitude":{
-	                                    "type": "string"
-	                                },
-	                                "image":{
-	                                    "type": "string"
-	                                },
-									"voice":{
-	                                    "type": "string"
-	                                }	                                
-	                             },
-	                            "type": "object"
-	                        } 	                          	                          
+	                        },                          	                          
                         },
-                        "required": [
-                            "claimID"
-                        ],
-                        "type": "object"
-                    },
+                   },
                     "maxItems": 1,
                     "minItems": 1,
                     "type": "array"
