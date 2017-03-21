@@ -11,6 +11,11 @@ var schemas = `
                     "items": {
                         "description": "A set of fields that constitute the writable fields in an asset's state. AssetID is mandatory along with at least one writable field. In this contract pattern, a partial state is used as an event.",
                         "properties": {
+                        
+	                        "claimId": {
+                                "description": "Claim Id",
+                                "type": "string"
+                            },
                            "policyNo": {
                                 "description": "Policy Number",
                                 "type": "string"
@@ -119,6 +124,11 @@ var schemas = `
 	                            "type": "object"
 	                        },                          	                          
                         },
+                        
+                        "required": [
+                            "policyNo"
+                        ],
+                        "type": "object"
                    },
                     "maxItems": 1,
                     "minItems": 1,
