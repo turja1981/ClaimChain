@@ -89,7 +89,7 @@ var schemas = `
 
 	                                "ssn": {
 	                                    "type": "string"
-	                                },
+	                                }
 
 	                            },
 	                            "type": "object"
@@ -122,7 +122,7 @@ var schemas = `
 	                                }
 	                             },
 	                            "type": "object"
-	                        },                          	                          
+	                        }                          	                          
                         },
                         
                         "required": [
