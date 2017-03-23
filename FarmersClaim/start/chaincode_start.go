@@ -313,7 +313,7 @@ func (t *SimpleChaincode) createAsset(stub shim.ChaincodeStubInterface, args []s
 			c.AdjusterReport.AdjusterLastName 	= "Doe"
 			c.AdjusterReport.EvaluationDateTime = "03/02/2017"
 		//	c.AdjusterReport.ApproveLossAmount	= "3000.00"
-
+			c.status  = "Claim_Submitted"
 
 			c.RepairedDetails.RepairShopName	= "Quick Repair Shop"
 			c.RepairedDetails.RepairZipCode  	= c.LossDetails.LossZipCode
@@ -509,7 +509,7 @@ func (t *SimpleChaincode) updateAsset(stub shim.ChaincodeStubInterface, args []s
 			return nil, err
 		}
 		
-		var customEvent = "{\"ClaimNo\":\"" + claimApplication.ClaimNo +"\" ,  \"InsuredName\" :\""+claimApplication.InsuredDetails.FirstName+" "+claimApplication.InsuredDetails.LastName+"\" , \"Desc\":\"Repair Invoice Submitted Successfully\"}"
+		var customEvent = "{\"ClaimNo\":\"" + claimApplication.ClaimNo +"\" ,  \"InsuredName\" :\""+claimApplication.InsuredDetails.FirstName+" "+claimApplication.InsuredDetails.LastName+"\" , \"Desc\":\"Repair Completed Successfully\"}"
 		err = stub.SetEvent("Claim_Repair_Invoice", []byte(customEvent))
 		if err != nil {
 			return nil, err
