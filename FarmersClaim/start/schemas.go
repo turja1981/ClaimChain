@@ -321,147 +321,7 @@ var schemas = `
                                 "description": "The ID of a managed Claim. The resource focal point for a smart contract.",
                                 "type": "string"
                             },
-                            "policyNo": {
-                                "description": "Policy Number",
-                                "type": "string"
-                            },
-                            "claimNo": {
-                                "description": "Claim Number",
-                                "type": "string"
-                            },
-                            "estmLossAmount": {
-                                "description": "EstmLossAmount",
-                                "type": "string"
-                            },
-                            "status": {
-                                "description": "Status",
-                                "type": "string"
-                            },
-                            "externalReport": {
-                                "description": "ExternalReport",
-                                "type": "string"
-                            },
-                            
-                            "lossDetails": {
-                                "description": "lossDetails",
-                                "properties": {
-                                    "lossType": {
-                                        "type": "string"
-                                    },
-                                    "lossDateTime":{
-                                        "type": "string"
-                                    },
-                                    "lossDescription":{
-                                        "type": "string"
-                                    },
-                                    "lossAddress": {
-                                        "type": "string"
-                                    },
-                                    "lossCity": {
-                                        "type": "string"
-                                    },
-                                    "lossState": {
-                                        "type": "string"
-                                    }
-                                },
-                                "type": "object"
-                            },
-                            
-							 "insuredDetails": {
-	                            "description": "insuredDetails",
-	                            "properties": {
-	                                "firstName": {
-	                                    "type": "string"
-	                                },
-	                                "lastName":{
-	                                    "type": "string"
-	                                },
-	                                "phoneNo":{
-	                                    "type": "string"
-	                                },
-	                                "email": {
-	                                    "type": "string"
-	                                },
-	                                "dob": {
-	                                    "type": "string"
-	                                },
-	                                "ssn": {
-	                                    "type": "string"
-	                                },
-	                                "drivingLicense": {
-	                                    "type": "string"
-	                                }
-	                            },
-	                            "type": "object"
-	                        },
-	                         "vehicleDetails": {
-	                            "description": "vehicleDetails",
-	                            "properties": {
-	                                "make": {
-	                                    "type": "string"
-	                                },
-	                                "Model":{
-	                                    "type": "string"
-	                                },
-	                                "vin":{
-	                                    "type": "string"
-	                                },
-	                                "year": {
-	                                    "type": "string"
-	                                }
-	                             },
-	                            "type": "object"
-	                        },
-	                        
-	                      "adjusterReport": {
-	                            "description": "adjusterReport",
-	                            "properties": {
-	                                "evaluationDateTime": {
-	                                    "type": "string"
-	                                },
-	                                "lossAmount":{
-	                                    "type": "string"
-	                                },
-	                                "remarks":{
-	                                    "type": "string"
-	                                }
-	                             },
-	                            "type": "object"
-	                        },  
-	                        
-	                     "repairedDetails": {
-	                            "description": "repairedDetails",
-	                            "properties": {
-	                                "repairDateTime": {
-	                                    "type": "string"
-	                                },
-	                                "itemRepaired":{
-	                                    "type": "string"
-	                                },
-	                                "cost":{
-	                                    "type": "string"
-	                                }
-	                             },
-	                            "type": "object"
-	                        },  
-	                         
-	                     "paymentDetails": {
-	                            "description": "repairedDetails",
-	                            "properties": {
-	                                "accountNo": {
-	                                    "type": "string"
-	                                },
-	                                "paymentAmount":{
-	                                    "type": "string"
-	                                },
-	                                "paymentDateTime":{
-	                                    "type": "string"
-	                                }
-	                             },
-	                            "type": "object"
-	                        }, 
-	                        
-	                     "sensorData": {
+		                     "sensorData": {
 	                            "description": "sensorData",
 	                            "properties": {
 	                                "latitude": {
@@ -481,7 +341,7 @@ var schemas = `
 	                        } 	                          	                          
                         },
                         "required": [
-                            "claimNo"
+                            "claimId"
                         ],
                         "type": "object"
                     },

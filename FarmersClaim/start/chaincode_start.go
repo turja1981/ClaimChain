@@ -313,7 +313,7 @@ func (t *SimpleChaincode) createAsset(stub shim.ChaincodeStubInterface, args []s
 			c.AdjusterReport.AdjusterLastName 	= "Doe"
 			c.AdjusterReport.EvaluationDateTime = "03/02/2017"
 		//	c.AdjusterReport.ApproveLossAmount	= "3000.00"
-			c.status  = "Claim_Submitted"
+			c.Status  = "Claim_Submitted"
 
 			c.RepairedDetails.RepairShopName	= "Quick Repair Shop"
 			c.RepairedDetails.RepairZipCode  	= c.LossDetails.LossZipCode
