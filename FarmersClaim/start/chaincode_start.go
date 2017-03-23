@@ -429,7 +429,7 @@ func (t *SimpleChaincode) updateAsset(stub shim.ChaincodeStubInterface, args []s
 			return nil, err
 		}
 		
-	} else if asset == "RepairInvoice"  {
+	} else if asset == "RequestApproval"  {
 	
 		
 		var payload = args[2]
@@ -462,7 +462,39 @@ func (t *SimpleChaincode) updateAsset(stub shim.ChaincodeStubInterface, args []s
 		
 		claimApplication.RepairedDetails.RepairDateTime 			= r.RepairDateTime
 		claimApplication.RepairedDetails.TotalCost 					= r.TotalCost
-		claimApplication.Status										= "Repair_Completed"
+		claimApplication.Status										= "Request_Approval"
+		
+		laBytes, err = json.Marshal(&claimApplication)
+		
+		if err != nil {
+		logger.Error("Could not marshal claim application post update", err)
+		return nil, err
+		}
+
+		err = stub.PutState(claimNo, laBytes)
+		if err != nil {
+			logger.Error("Could not save claim application post update", err)
+			return nil, err
+		}
+		
+		var customEvent = "{\"ClaimNo\":\"" + claimApplication.ClaimNo +"\" ,  \"InsuredName\" :\""+claimApplication.InsuredDetails.FirstName+" "+claimApplication.InsuredDetails.LastName+"\" , \"Desc\":\"Repair Invoice Submitted Successfully\"}"
+		err = stub.SetEvent("Claim_Request_Approval", []byte(customEvent))
+		if err != nil {
+			return nil, err
+		}
+		
+	} else if asset == "RepairInvoice"  {
+		laBytes, err := stub.GetState(claimNo)
+		
+		if err != nil {
+			logger.Error("Could not fetch claim application from ledger", err)
+			return nil, err
+		}
+		var claimApplication Claim 
+		err = json.Unmarshal(laBytes, &claimApplication)
+	
+
+		claimApplication.Status			= "Repair_Completed"
 		
 		laBytes, err = json.Marshal(&claimApplication)
 		
@@ -483,6 +515,37 @@ func (t *SimpleChaincode) updateAsset(stub shim.ChaincodeStubInterface, args []s
 			return nil, err
 		}
 		
+	} else if asset == "ApproveRepairClaim"  {
+		laBytes, err := stub.GetState(claimNo)
+		
+		if err != nil {
+			logger.Error("Could not fetch claim application from ledger", err)
+			return nil, err
+		}
+		var claimApplication Claim 
+		err = json.Unmarshal(laBytes, &claimApplication)
+	
+
+		claimApplication.Status	 = "Approve_Claim"
+		
+		laBytes, err = json.Marshal(&claimApplication)
+		
+		if err != nil {
+		logger.Error("Could not marshal claim application post update", err)
+		return nil, err
+		}
+
+		err = stub.PutState(claimNo, laBytes)
+		if err != nil {
+			logger.Error("Could not save claim application post update", err)
+			return nil, err
+		}
+		
+		var customEvent = "{\"ClaimNo\":\"" + claimApplication.ClaimNo +"\" ,  \"InsuredName\" :\""+claimApplication.InsuredDetails.FirstName+" "+claimApplication.InsuredDetails.LastName+"\" , \"Desc\":\"Repair Invoice Submitted Successfully\"}"
+		err = stub.SetEvent("Claim_Repair_Approval", []byte(customEvent))
+		if err != nil {
+			return nil, err
+		}
 	} else if asset == "Payment"  {
 	
 		var payload = args[2]
