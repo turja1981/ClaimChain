@@ -312,7 +312,7 @@ func (t *SimpleChaincode) createAsset(stub shim.ChaincodeStubInterface, args []s
 			c.AdjusterReport.AdjusterFirstName 	= "John"
 			c.AdjusterReport.AdjusterLastName 	= "Doe"
 			c.AdjusterReport.EvaluationDateTime = "03/02/2017"
-			c.AdjusterReport.ApproveLossAmount	= "3000.00"
+		//	c.AdjusterReport.ApproveLossAmount	= "3000.00"
 
 
 			c.RepairedDetails.RepairShopName	= "Quick Repair Shop"
@@ -477,7 +477,7 @@ func (t *SimpleChaincode) updateAsset(stub shim.ChaincodeStubInterface, args []s
 			return nil, err
 		}
 		
-		var customEvent = "{\"ClaimNo\":\"" + claimApplication.ClaimNo +"\" ,  \"InsuredName\" :\""+claimApplication.InsuredDetails.FirstName+" "+claimApplication.InsuredDetails.LastName+"\" , \"Desc\":\"Repair Invoice Submitted Successfully\"}"
+		var customEvent = "{\"ClaimNo\":\"" + claimApplication.ClaimNo +"\" ,  \"InsuredName\" :\""+claimApplication.InsuredDetails.FirstName+" "+claimApplication.InsuredDetails.LastName+"\" , \"Desc\":\"Repair Approval Request Submitted Successfully\"}"
 		err = stub.SetEvent("Claim_Request_Approval", []byte(customEvent))
 		if err != nil {
 			return nil, err
@@ -541,7 +541,7 @@ func (t *SimpleChaincode) updateAsset(stub shim.ChaincodeStubInterface, args []s
 			return nil, err
 		}
 		
-		var customEvent = "{\"ClaimNo\":\"" + claimApplication.ClaimNo +"\" ,  \"InsuredName\" :\""+claimApplication.InsuredDetails.FirstName+" "+claimApplication.InsuredDetails.LastName+"\" , \"Desc\":\"Repair Invoice Submitted Successfully\"}"
+		var customEvent = "{\"ClaimNo\":\"" + claimApplication.ClaimNo +"\" ,  \"InsuredName\" :\""+claimApplication.InsuredDetails.FirstName+" "+claimApplication.InsuredDetails.LastName+"\" , \"Desc\":\"Repair Invoice Approved Successfully\"}"
 		err = stub.SetEvent("Claim_Repair_Approval", []byte(customEvent))
 		if err != nil {
 			return nil, err
