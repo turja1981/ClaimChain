@@ -479,7 +479,7 @@ func (t *SimpleChaincode) updateAsset(stub shim.ChaincodeStubInterface, args []s
 		claimApplication.RepairedDetails.TotalCost 					= r.TotalCost
 		claimApplication.Status										= "Request_Approval"
 		
-		laBytes, err = json.Marshal(&claimApplication)
+		
 		
 		if err != nil {
 		logger.Error("Could not marshal claim application post update", err)
@@ -506,19 +506,9 @@ func (t *SimpleChaincode) updateAsset(stub shim.ChaincodeStubInterface, args []s
 			if err != nil {
 				return nil, err
 			}
-			
-			claimApplication.PaymentDetails.BankName 			= "CITI BANK"
-			claimApplication.PaymentDetails.AccountNo 			= "123456"
-			claimApplication.PaymentDetails.PaymentAmount 		= r.TotalCost
-			claimApplication.Status								= "Payment_Submitted"
-			
-			customEvent = "{\"ClaimNo\":\"" + claimApplication.ClaimNo +"\" ,  \"InsuredName\" :\""+claimApplication.InsuredDetails.FirstName+" "+claimApplication.InsuredDetails.LastName+"\" , \"Desc\":\"Payment for Repair Submitted Successfully\"}"
-			err = stub.SetEvent("Claim_Bank_Payment", []byte(customEvent))
-			if err != nil {
-				return nil, err
-			}			
 		}
 		
+		laBytes, err = json.Marshal(&claimApplication)
 		err = stub.PutState(claimNo, laBytes)
 		if err != nil {
 			logger.Error("Could not save claim application post update", err)
