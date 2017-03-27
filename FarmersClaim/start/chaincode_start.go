@@ -24,7 +24,7 @@ import (
 //	"io/ioutil"
 //	"time"
 	"strconv" 
-	//"strings"
+	"strings"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	"encoding/json"
 	//"regexp"
@@ -148,6 +148,9 @@ type Sensor struct {
 }
 
 
+
+
+
 var  CLAIM_NO = 7000000
 // ============================================================================================================================
 // Main
@@ -248,10 +251,17 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
     } else if function == "updateAsset" {
         // update assetID
         return t.updateAsset(stub, args)
+    } else if function == "saveISO" {
+        // update assetID
+        return t.updateAsset(stub, args)
+    } else if function == "saveDMV" {
+        // update assetID
+        return t.updateAsset(stub, args)
     } 
     
 	return nil, errors.New("Received unknown invocation: " + function)
 }
+
 
 
 func (t *SimpleChaincode) createAsset(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
@@ -263,102 +273,103 @@ func (t *SimpleChaincode) createAsset(stub shim.ChaincodeStubInterface, args []s
 		return nil, errors.New("Expected atleast two arguments for Claim application creation")
 	}
 		
-		var payload = args[0]
-		b := []byte(payload)
-		
-		var c Claim
-		var err = json.Unmarshal(b, &c)
-		
-		var bytes []byte
-		
-		//DMV
-		/*
-		body := bytes.NewBuffer(b)
-		r_dmv, _ := http.Post("https://claimnode.mybluemix.net/verify/DMV", "application/json", body)
-		response_dmv, _ := ioutil.ReadAll(r_dmv.Body)
-		
-		var strDMVResponse  = string(response_dmv)
-		strDMVResponse = strings.Replace(strDMVResponse, "\\", "" , -1)
-		
-		// ISO
-		
-		r_iso, _ := http.Post("https://claimnode.mybluemix.net/verify/ISO", "application/json", body)
-		response_iso, _ := ioutil.ReadAll(r_iso.Body)
-		
-		var strISOResponse  = string(response_iso)
-		strISOResponse = strings.Replace(strISOResponse, "\\", "" , -1)
-		
-		// Choicepoint
-		
-		r_choicepoint, _ := http.Post("https://claimnode.mybluemix.net/verify/Choicepoint", "application/json", body)
-		response_choicepoint, _ := ioutil.ReadAll(r_choicepoint.Body)
-		
-		var strChoiceResponse  = string(response_choicepoint)
-		strChoiceResponse = strings.Replace(strChoiceResponse, "\\", "" , -1)
-		
+	var payload = args[0]
+	b := []byte(payload)
 	
-		c.ExternalReport   = 	strDMVResponse + " , " +strISOResponse+ "  , " + strChoiceResponse
-		*/
+	var c Claim
+	var err = json.Unmarshal(b, &c)
+	
+	var bytes []byte
+	
+	// Contract Rule-:-Check For Fraud Claim //
 		
-		flag , _  :=  t.checkFraudRecord(stub,c)
-		if (!flag) {
-			CLAIM_NO =  CLAIM_NO + 1
-			c.ClaimNo = strconv.Itoa(CLAIM_NO)
-			
-			// Adjuster Assigment 
+	flag , _  :=  t.checkFraudRecord(stub,c)
+	if (!flag) {
+		CLAIM_NO =  CLAIM_NO + 1
+		c.ClaimNo = strconv.Itoa(CLAIM_NO)
+		c.Status  = "Claim_Submitted"
+		
+		// Contract Rule-:-Adjuster Assigment  depending on LossType //
 
+		if strings.Contains(c.LossDetails.LossType, "Total Loss"){
 			c.AdjusterReport.AdjusterZipCode 	= c.LossDetails.LossZipCode
-			c.AdjusterReport.AdjusterSpeciality = "Collision"
-			c.AdjusterReport.AdjusterFirstName 	= "John"
+			c.AdjusterReport.AdjusterSpeciality = "Total Loss"
+			c.AdjusterReport.AdjusterFirstName 	= "Jack"
 			c.AdjusterReport.AdjusterLastName 	= "Doe"
-			c.AdjusterReport.EvaluationDateTime = "03/02/2017"
-		//	c.AdjusterReport.ApproveLossAmount	= "3000.00"
-			c.Status  = "Claim_Submitted"
 
-			c.RepairedDetails.RepairShopName	= "Quick Repair Shop"
-			c.RepairedDetails.RepairZipCode  	= c.LossDetails.LossZipCode
 			
-			c.RepairedDetails.ItemRepaired[0].ItemId = "0"
-			c.RepairedDetails.ItemRepaired[1].ItemId = "1"
-			c.RepairedDetails.ItemRepaired[2].ItemId = "2"
-			
-			_ , err = save_changes(stub , c)
-			
-			if err != nil {
-				logger.Error("Could not save claim to ledger", err)
-				return nil, err
-			}
-			
-			bytes, err = stub.GetState(c.ClaimNo)
-			
-			err = json.Unmarshal(bytes, &c); 
-			
-			var customEvent = "{\"ClaimNo\":\"" + c.ClaimNo +"\" ,  \"InsuredName\" :\""+c.InsuredDetails.FirstName+" "+c.InsuredDetails.LastName+"\" , \"Desc\":\"Claim  Created Successfully\"}"
-			err = stub.SetEvent("Claim_Notification", []byte(customEvent))
-			if err != nil {
-				return nil, err
-			}
-			
-		} else {
-			returnMsg := "{"+"\"ReturnMessage\""+":"+"\"Poteltial Duplicate Claim\""+"}" 
-			bytes = (([]byte)(returnMsg))
-		
-			var customEvent = "{\"PolicyNo\":\"" + c.PolicyNo +"\" ,  \"InsuredName\" :\""+c.InsuredDetails.FirstName+" "+c.InsuredDetails.LastName+"\" , \"Desc\":\"Potential Fraud Claim with SSN :"+c.InsuredDetails.SSN+" VIN :"+c.VehicleDetails.VIN +" and Loss Date:"+c.LossDetails.LossDateTime+"\" }"
-			err = stub.SetEvent("Claim_Notification", []byte(customEvent))
-			if err != nil {
-				return nil, err
-			}
-			
-			
-			return nil, errors.New(returnMsg)
+		} else if  strings.Contains(c.LossDetails.LossType, "Personal Injury"){
+			c.AdjusterReport.AdjusterZipCode 	= c.LossDetails.LossZipCode
+			c.AdjusterReport.AdjusterSpeciality = "Personal Injury"
+			c.AdjusterReport.AdjusterFirstName 	= "John"
+			c.AdjusterReport.AdjusterLastName 	= "Smith"
+
+		}else if  strings.Contains(c.LossDetails.LossType, "Liability Claims"){
+			c.AdjusterReport.AdjusterZipCode 	= c.LossDetails.LossZipCode
+			c.AdjusterReport.AdjusterSpeciality = "Liability Claims"
+			c.AdjusterReport.AdjusterFirstName 	= "Bill"
+			c.AdjusterReport.AdjusterLastName 	= "Joy"
+
 		}
 		
+		// Contract Rule-:-Repair Shop Assignment Depending on City //
 		
+		if c.LossDetails.LossCity =="Kolkata" {
+			c.RepairedDetails.RepairShopName	= "Quick Repair Shop"
+			c.RepairedDetails.RepairZipCode  	= c.LossDetails.LossZipCode
+		} else if c.LossDetails.LossCity =="Chennai" {
+			c.RepairedDetails.RepairShopName	= "24X7 Repair Shop"
+			c.RepairedDetails.RepairZipCode  	= c.LossDetails.LossZipCode
+		} else if c.LossDetails.LossCity =="Bengaluru" {
+			c.RepairedDetails.RepairShopName	= "Favourite Repair Shop"
+			c.RepairedDetails.RepairZipCode  	= c.LossDetails.LossZipCode
+		}
 
-
-
-
+		// Contract Rule-:-Repair Shop Assignment Depending Loss Zip Code //	
+		
+		if c.LossDetails.LossZipCode =="90001" {
+			c.RepairedDetails.RepairShopName	= "Quick Repair Shop"
+			c.RepairedDetails.RepairZipCode  	= c.LossDetails.LossZipCode
+		} else if c.LossDetails.LossZipCode =="90002" {
+			c.RepairedDetails.RepairShopName	= "24X7 Repair Shop"
+			c.RepairedDetails.RepairZipCode  	= c.LossDetails.LossZipCode
+		} else if c.LossDetails.LossZipCode =="90003" {
+			c.RepairedDetails.RepairShopName	= "Favourite Repair Shop"
+			c.RepairedDetails.RepairZipCode  	= c.LossDetails.LossZipCode
+		}
+				
+		
+		c.RepairedDetails.ItemRepaired[0].ItemId = "0"
+		c.RepairedDetails.ItemRepaired[1].ItemId = "1"
+		c.RepairedDetails.ItemRepaired[2].ItemId = "2"
+		
+		_ , err = save_changes(stub , c)
+		
+		if err != nil {
+			logger.Error("Could not save claim to ledger", err)
+			return nil, err
+		}
+		
+		bytes, err = stub.GetState(c.ClaimNo)
+		
+		err = json.Unmarshal(bytes, &c); 
+		
+		var customEvent = "{\"ClaimNo\":\"" + c.ClaimNo +"\" ,  \"InsuredName\" :\""+c.InsuredDetails.FirstName+" "+c.InsuredDetails.LastName+"\" , \"Desc\":\"Claim  Created Successfully\"}"
+		err = stub.SetEvent("Claim_Notification", []byte(customEvent))
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		returnMsg := "{"+"\"ReturnMessage\""+":"+"\"Poteltial Duplicate Claim\""+"}" 
+		bytes = (([]byte)(returnMsg))
 	
+		var customEvent = "{\"PolicyNo\":\"" + c.PolicyNo +"\" ,  \"InsuredName\" :\""+c.InsuredDetails.FirstName+" "+c.InsuredDetails.LastName+"\" , \"Desc\":\"Potential Fraud Claim with SSN :"+c.InsuredDetails.SSN+" VIN :"+c.VehicleDetails.VIN +" and Loss Date:"+c.LossDetails.LossDateTime+"\" }"
+		err = stub.SetEvent("Claim_Notification", []byte(customEvent))
+		if err != nil {
+			return nil, err
+		}
+		return nil, errors.New(returnMsg)
+	}
 	logger.Info("______Returning from create claim application :"+c.ClaimNo)
 	return bytes, nil
 
@@ -405,10 +416,12 @@ func (t *SimpleChaincode) updateAsset(stub shim.ChaincodeStubInterface, args []s
 		var claimApplication Claim
 		err = json.Unmarshal(laBytes, &claimApplication)
 		
+		// Claim Status Update on Investigation Report Submission
+		
 		claimApplication.AdjusterReport.EvaluationDateTime 	= a.EvaluationDateTime
 		claimApplication.AdjusterReport.ApproveLossAmount 	= a.ApproveLossAmount
 		claimApplication.AdjusterReport.Remarks 			= a.Remarks
-		claimApplication.Status								= "Claim_Approved"
+		claimApplication.Status								= "Investigation_Completed"
 		
 		laBytes, err = json.Marshal(&claimApplication)
 		
@@ -447,6 +460,8 @@ func (t *SimpleChaincode) updateAsset(stub shim.ChaincodeStubInterface, args []s
 		var claimApplication Claim 
 		err = json.Unmarshal(laBytes, &claimApplication)
 		
+		// Claim Status  and Repair Parts Update After Damage analysis
+		
 		for index, each := range r.ItemRepaired {
 		
 			claimApplication.RepairedDetails.ItemRepaired[index].ItemId 		= r.ItemRepaired[index].ItemId
@@ -470,16 +485,43 @@ func (t *SimpleChaincode) updateAsset(stub shim.ChaincodeStubInterface, args []s
 		logger.Error("Could not marshal claim application post update", err)
 		return nil, err
 		}
+		
+		totCost, err := strconv.ParseFloat(claimApplication.RepairedDetails.TotalCost, 64)
+		estmCost, err := strconv.ParseFloat(claimApplication.AdjusterReport.ApproveLossAmount, 64)
 
+		// Contract Rule-:-If Auto Repair TotalCost is less or equal to Estimated Loss Amount , then Automatic approval  and Payment , otherwise Manual approval //
+
+		if totCost > estmCost {
+			var customEvent = "{\"ClaimNo\":\"" + claimApplication.ClaimNo +"\" ,  \"InsuredName\" :\""+claimApplication.InsuredDetails.FirstName+" "+claimApplication.InsuredDetails.LastName+"\" , \"Desc\":\"Repair Approval Request Submitted Successfully\"}"
+			err = stub.SetEvent("Claim_Request_Approval", []byte(customEvent))
+			if err != nil {
+				return nil, err
+			}
+			
+		} else {
+			claimApplication.Status	 = "Approve_Claim"
+			
+			var customEvent = "{\"ClaimNo\":\"" + claimApplication.ClaimNo +"\" ,  \"InsuredName\" :\""+claimApplication.InsuredDetails.FirstName+" "+claimApplication.InsuredDetails.LastName+"\" , \"Desc\":\"Repair Invoice Approved Successfully\"}"
+			err = stub.SetEvent("Claim_Repair_Approval", []byte(customEvent))
+			if err != nil {
+				return nil, err
+			}
+			
+			claimApplication.PaymentDetails.BankName 			= "CITI BANK"
+			claimApplication.PaymentDetails.AccountNo 			= "123456"
+			claimApplication.PaymentDetails.PaymentAmount 		= r.TotalCost
+			claimApplication.Status								= "Payment_Submitted"
+			
+			customEvent = "{\"ClaimNo\":\"" + claimApplication.ClaimNo +"\" ,  \"InsuredName\" :\""+claimApplication.InsuredDetails.FirstName+" "+claimApplication.InsuredDetails.LastName+"\" , \"Desc\":\"Payment for Repair Submitted Successfully\"}"
+			err = stub.SetEvent("Claim_Bank_Payment", []byte(customEvent))
+			if err != nil {
+				return nil, err
+			}			
+		}
+		
 		err = stub.PutState(claimNo, laBytes)
 		if err != nil {
 			logger.Error("Could not save claim application post update", err)
-			return nil, err
-		}
-		
-		var customEvent = "{\"ClaimNo\":\"" + claimApplication.ClaimNo +"\" ,  \"InsuredName\" :\""+claimApplication.InsuredDetails.FirstName+" "+claimApplication.InsuredDetails.LastName+"\" , \"Desc\":\"Repair Approval Request Submitted Successfully\"}"
-		err = stub.SetEvent("Claim_Request_Approval", []byte(customEvent))
-		if err != nil {
 			return nil, err
 		}
 		
@@ -494,7 +536,10 @@ func (t *SimpleChaincode) updateAsset(stub shim.ChaincodeStubInterface, args []s
 		err = json.Unmarshal(laBytes, &claimApplication)
 	
 
-		claimApplication.Status			= "Repair_Completed"
+		claimApplication.Status								= "Repair_Completed"
+		claimApplication.PaymentDetails.BankName 			= "CITI BANK"
+		claimApplication.PaymentDetails.AccountNo 			= "123456"
+	//	claimApplication.PaymentDetails.PaymentAmount 		= totCost
 		
 		laBytes, err = json.Marshal(&claimApplication)
 		
